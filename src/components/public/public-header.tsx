@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { weddingConfig } from "@/config/wedding";
+import type { PublicWedding } from "@/services/wedding/public";
 
 const navigation = [
   ["Nossa história", "/#historia"],
@@ -8,16 +8,16 @@ const navigation = [
   ["Informações", "/informacoes"],
 ] as const;
 
-export function PublicHeader() {
+export function PublicHeader({ wedding }: { wedding: PublicWedding }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[#211a16]/45 text-white backdrop-blur-xl">
       <div className="page-shell flex h-[4.5rem] items-center justify-between gap-4">
         <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">
           <span className="font-editorial grid size-10 place-items-center rounded-full border border-white/35 text-sm">
-            {weddingConfig.couple.initials}
+            {wedding.initials}
           </span>
           <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">
-            {weddingConfig.couple.firstName} & {weddingConfig.couple.secondName}
+            {wedding.firstName} & {wedding.secondName}
           </span>
         </Link>
 

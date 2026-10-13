@@ -1,12 +1,14 @@
 import { PublicFooter } from "@/components/public/public-footer";
+import { getPublicWedding } from "@/services/wedding/public";
 import { PublicHeader } from "@/components/public/public-header";
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  const wedding = await getPublicWedding();
   return (
     <>
-      <PublicHeader />
+      <PublicHeader wedding={wedding} />
       <main>{children}</main>
-      <PublicFooter />
+      <PublicFooter wedding={wedding} />
     </>
   );
 }

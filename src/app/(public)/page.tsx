@@ -4,15 +4,17 @@ import { HeroSection } from "@/components/public/hero-section";
 import { StoryTimeline } from "@/components/public/story-timeline";
 import { SectionTitle } from "@/components/ui/section-title";
 import { weddingConfig } from "@/config/wedding";
+import { getPublicWedding } from "@/services/wedding/public";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const wedding = await getPublicWedding();
   return (
     <>
-      <HeroSection />
+      <HeroSection wedding={wedding} />
 
       <section className="section-space bg-surface" aria-label="Contagem regressiva">
         <div className="page-shell max-w-3xl">
-          <Countdown target={weddingConfig.event.isoDate} />
+          <Countdown target={wedding.isoDate} />
         </div>
       </section>
 
@@ -34,14 +36,14 @@ export default function HomePage() {
           <div className="card-soft mx-auto mt-12 grid max-w-4xl overflow-hidden md:grid-cols-[0.85fr_1.15fr]">
             <div className="min-h-72 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,.9),transparent_24%),linear-gradient(135deg,#7f8967,#424b31)] p-8 text-white">
               <p className="text-xs tracking-[0.2em] uppercase opacity-80">Cerimônia & recepção</p>
-              <p className="font-editorial mt-24 text-5xl">{weddingConfig.venue.time}</p>
-              <p className="mt-2 text-sm opacity-80">24 de outubro de 2027</p>
+              <p className="font-editorial mt-24 text-5xl">{wedding.venue.time}</p>
+              <p className="mt-2 text-sm opacity-80">{wedding.displayDate}</p>
             </div>
             <div className="p-8 sm:p-10">
-              <p className="eyebrow">{weddingConfig.venue.name}</p>
+              <p className="eyebrow">{wedding.venue.name}</p>
               <h3 className="font-editorial mt-3 text-4xl">Celebraremos tudo no mesmo lugar</h3>
-              <p className="mt-5 leading-7 text-muted">{weddingConfig.venue.description}</p>
-              <p className="mt-5 text-sm font-semibold">{weddingConfig.venue.address}</p>
+              <p className="mt-5 leading-7 text-muted">{wedding.venue.description}</p>
+              <p className="mt-5 text-sm font-semibold">{wedding.venue.address}</p>
               <Link href="/casamento" className="focus-ring mt-8 inline-flex rounded-full border border-foreground px-5 py-3 text-sm font-semibold transition hover:bg-foreground hover:text-white">
                 Ver detalhes do casamento
               </Link>

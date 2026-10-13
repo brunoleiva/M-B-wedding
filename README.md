@@ -96,3 +96,14 @@ docs/
 ## Deploy
 
 A aplicação está preparada para Vercel. Configure as mesmas variáveis no ambiente de deploy, aplique migrations no Supabase e execute o seed apenas no ambiente desejado.
+
+
+## Fase 2 — Configurações dinâmicas
+
+Após aplicar a migration inicial e associar o primeiro usuário em `admin_memberships`, execute também `supabase/migrations/202610130002_wedding_media.sql` no Supabase SQL Editor. Ela cria o bucket público `wedding-media` e restringe uploads/exclusões aos administradores do casamento. Não use a service role no navegador.
+
+Acesse `/admin/configuracoes` para alterar os nomes, data, horário, fuso, cidade, mensagem da capa, foto e dados do local. As informações são salvas nas tabelas `weddings` e `venues`; a foto vai para Supabase Storage. A Home, o cabeçalho, o rodapé e a página `/casamento` leem os dados do primeiro casamento publicado (`is_published=true`).
+
+**Atenção:** a história e o cronograma continuam usando conteúdo fictício centralizado; suas edições estarão disponíveis em uma etapa posterior. Se não houver casamento publicado, o site ainda usa o exemplo local como fallback.
+
+Depois de subir as alterações ao GitHub e aplicar a migration, confirme `npm run check` no ambiente com dependências instaladas e redeploy na Vercel.
