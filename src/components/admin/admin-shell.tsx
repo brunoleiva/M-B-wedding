@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { SaveSuccessModal } from "./save-success-modal";
 import { logoutAction } from "@/app/admin/actions";
 
 const items = [
@@ -51,6 +53,7 @@ export function AdminShell({ children, email, initials }: { children: React.Reac
           </form>
         </header>
         <main className="p-5 sm:p-8 lg:p-10">{children}</main>
+        <Suspense fallback={null}><SaveSuccessModal /></Suspense>
       </div>
     </div>
   );

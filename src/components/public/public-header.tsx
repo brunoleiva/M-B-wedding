@@ -3,7 +3,7 @@ import type { PublicWedding } from "@/services/wedding/public";
 import { sections, type Appearance } from "@/services/wedding/appearance";
 
 export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; visible: Appearance["visible"] }) {
-  const navigation=sections.filter(s=>visible[s.key]).map(s=>({label:s.title,href:s.href}));
+  const navigation=[{label:"Home",href:"/"},...sections.filter(s=>visible[s.key]).map(s=>({label:s.title,href:s.href}))];
   return <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[#211a16]/80 text-white backdrop-blur-xl">
     <div className="page-shell flex h-[4.5rem] items-center justify-between gap-4">
       <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">

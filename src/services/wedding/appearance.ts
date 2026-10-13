@@ -17,6 +17,24 @@ export const defaultColors = {
   brand_color: "#65704d", accent_color: "#a87655",
 };
 export type ColorKey = keyof typeof defaultColors;
+export type ColorPalette = typeof defaultColors;
+export const defaultColumn = (key: ColorKey) => `default_${key}` as const;
+
+export async function getSavedDefaultColors(weddingId?: string): Promise<ColorPalette> {
+  const fallback = {...defaultColors};
+  if (!weddingId) return fallback;
+  const db = await createSupabaseServerClient();
+  if (!db) return fallback;
+  const {data} = await db.from("wedding_appearance").select("default_background_color,default_surface_color,default_foreground_color,default_brand_color,default_accent_color")
+    .eq("wedding_id", weddingId).maybeSingle();
+  if (!data) return fallback;
+  for (const key of Object.keys(fallback) as ColorKey[]) {
+    const value = data[defaultColumn(key)];
+    if (typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value)) fallback[key] = value;
+  }
+  return fallback;
+}
+
 export type Appearance = { colors: typeof defaultColors; visible: Record<SectionKey, boolean> };
 export const defaultVisibility = (): Record<SectionKey, boolean> =>
   Object.fromEntries(sections.map(s=>[s.key,true])) as Record<SectionKey,boolean>;
