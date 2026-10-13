@@ -4,6 +4,7 @@ import { logoutAction } from "@/app/admin/actions";
 const items = [
   ["Visão geral", "/admin"],
   ["Conteúdo", "/admin/conteudo"],
+  ["Cerimônia e cronograma", "/admin/casamento"],
   ["Convidados", "/admin/convidados"],
   ["RSVP", "/admin/rsvp"],
   ["Presentes", "/admin/presentes"],

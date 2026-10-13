@@ -3,7 +3,8 @@ import { Countdown } from "@/components/public/countdown";
 import { HeroSection } from "@/components/public/hero-section";
 import { StoryTimeline } from "@/components/public/story-timeline";
 import { SectionTitle } from "@/components/ui/section-title";
-import { weddingConfig } from "@/config/wedding";
+import { WeddingDetails } from "@/components/public/wedding-details";
+import { getPublishedEventDetails } from "@/services/wedding/event-details";
 import { getPublicContent } from "@/services/wedding/content";
 import { PhotoGallery } from "@/components/public/photo-gallery";
 import { getPublicWedding } from "@/services/wedding/public";
@@ -11,6 +12,7 @@ import { getPublicWedding } from "@/services/wedding/public";
 export default async function HomePage() {
   const wedding = await getPublicWedding();
   const {story,gallery} = await getPublicContent();
+  const {venues, schedule, timezone} = await getPublishedEventDetails();
   return (
     <>
       <HeroSection wedding={wedding} />
@@ -35,42 +37,9 @@ export default async function HomePage() {
 
       {gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
 
-      <section id="casamento" className="section-space scroll-mt-20 bg-[#e9e1d6]">
-        <div className="page-shell">
-          <SectionTitle eyebrow="O casamento" title="Um dia para guardar para sempre" />
-          <div className="card-soft mx-auto mt-12 grid max-w-4xl overflow-hidden md:grid-cols-[0.85fr_1.15fr]">
-            <div className="min-h-72 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,.9),transparent_24%),linear-gradient(135deg,#7f8967,#424b31)] p-8 text-white">
-              <p className="text-xs tracking-[0.2em] uppercase opacity-80">Cerimônia & recepção</p>
-              <p className="font-editorial mt-24 text-5xl">{wedding.venue.time}</p>
-              <p className="mt-2 text-sm opacity-80">{wedding.displayDate}</p>
-            </div>
-            <div className="p-8 sm:p-10">
-              <p className="eyebrow">{wedding.venue.name}</p>
-              <h3 className="font-editorial mt-3 text-4xl">Os detalhes do nosso grande dia</h3>
-              <p className="mt-5 leading-7 text-muted">{wedding.venue.description}</p>
-              <p className="mt-5 text-sm font-semibold">{wedding.venue.address}</p>
-              <Link href="/casamento" className="focus-ring mt-8 inline-flex rounded-full border border-foreground px-5 py-3 text-sm font-semibold transition hover:bg-foreground hover:text-white">
-                Ver detalhes do casamento
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section-space bg-surface">
-        <div className="page-shell">
-          <SectionTitle eyebrow="O dia" title="Nosso cronograma" description="Uma visão simples para você saber o que esperar — sem correrias." />
-          <div className="mx-auto mt-12 grid max-w-5xl gap-3 md:grid-cols-5">
-            {weddingConfig.schedule.map((item) => (
-              <div key={`${item.time}-${item.title}`} className="rounded-[1.35rem] border border-line bg-background p-5 text-center">
-                <p className="font-editorial text-3xl text-brand-strong">{item.time}</p>
-                <p className="mt-3 text-sm font-semibold">{item.title}</p>
-                {item.description ? <p className="mt-2 text-xs leading-5 text-muted">{item.description}</p> : null}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {(venues.length > 0 || schedule.length > 0) && <section id="casamento" className="section-space scroll-mt-20 bg-[#e9e1d6]">
+        <div className="page-shell"><SectionTitle eyebrow="O casamento" title="Um dia para guardar para sempre" /><div className="mt-12"><WeddingDetails venues={venues} schedule={schedule} timezone={timezone} compact /></div><Link href="/casamento" className="mt-8 inline-block underline">Ver todos os detalhes</Link></div>
+      </section>}
 
       <section className="section-space bg-[#3e4731] text-white">
         <div className="page-shell grid items-center gap-10 lg:grid-cols-[1.15fr_.85fr]">

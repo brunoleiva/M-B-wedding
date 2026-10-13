@@ -1,21 +1,12 @@
 import { SectionTitle } from "@/components/ui/section-title";
-import { getPublicWedding } from "@/services/wedding/public";
+import { WeddingDetails } from "@/components/public/wedding-details";
+import { getPublishedEventDetails } from "@/services/wedding/event-details";
 
 export const metadata = { title: "O casamento" };
 
 export default async function WeddingPage() {
-  const wedding = await getPublicWedding();
-  return (
-    <section className="section-space pt-32">
-      <div className="page-shell max-w-5xl">
-        <SectionTitle eyebrow="O casamento" title="Tudo o que você precisa saber" description="Confira as informações que já estão disponíveis sobre o nosso grande dia." />
-        <div className="card-soft mt-12 p-8 sm:p-12">
-          <p className="eyebrow">{wedding.venue.name}</p>
-          <h2 className="font-editorial mt-3 text-4xl">{wedding.displayDate} · {wedding.venue.time}</h2>
-          <p className="mt-5 max-w-2xl leading-7 text-muted">{wedding.venue.description}</p>
-          <p className="mt-6 font-semibold">{wedding.venue.address}</p>
-        </div>
-      </div>
-    </section>
-  );
+  const {venues, schedule, timezone} = await getPublishedEventDetails();
+  return <section className="section-space pt-32"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="O casamento" title="Tudo o que você precisa saber" description="Os detalhes para celebrarmos juntos." />
+    <div className="mt-12">{venues.length || schedule.length ? <WeddingDetails venues={venues} schedule={schedule} timezone={timezone}/> : <div className="card-soft p-10 text-center text-muted">Em breve compartilharemos os detalhes da cerimônia e da festa.</div>}</div>
+  </div></section>;
 }
