@@ -15,6 +15,8 @@ export type SectionKey = typeof sections[number]["key"];
 export const defaultColors = {
   background_color: "#f8f4ed", surface_color: "#fffdf9", foreground_color: "#261f1a",
   brand_color: "#65704d", accent_color: "#a87655",
+  header_color: "#211a16", header_text_color: "#ffffff", header_hover_color: "#c5b69f",
+  button_text_color: "#ffffff", button_hover_color: "#4e5939",
 };
 export type ColorKey = keyof typeof defaultColors;
 export type ColorPalette = typeof defaultColors;
@@ -25,7 +27,7 @@ export async function getSavedDefaultColors(weddingId?: string): Promise<ColorPa
   if (!weddingId) return fallback;
   const db = await createSupabaseServerClient();
   if (!db) return fallback;
-  const {data} = await db.from("wedding_appearance").select("default_background_color,default_surface_color,default_foreground_color,default_brand_color,default_accent_color")
+  const {data} = await db.from("wedding_appearance").select("default_background_color,default_surface_color,default_foreground_color,default_brand_color,default_accent_color,default_header_color,default_header_text_color,default_header_hover_color,default_button_text_color,default_button_hover_color")
     .eq("wedding_id", weddingId).maybeSingle();
   if (!data) return fallback;
   for (const key of Object.keys(fallback) as ColorKey[]) {
@@ -51,7 +53,7 @@ export async function getAppearance(weddingId?: string): Promise<Appearance> {
   }
   if(!id)return result;
   const [theme,flags]=await Promise.all([
-    db.from("wedding_appearance").select("background_color,surface_color,foreground_color,brand_color,accent_color").eq("wedding_id",id).maybeSingle(),
+    db.from("wedding_appearance").select("background_color,surface_color,foreground_color,brand_color,accent_color,header_color,header_text_color,header_hover_color,button_text_color,button_hover_color").eq("wedding_id",id).maybeSingle(),
     db.from("site_sections").select("key,is_enabled").eq("wedding_id",id),
   ]);
   if(theme.data){
@@ -74,5 +76,10 @@ export function appearanceStyle(colors: Appearance["colors"]): CSSProperties {
     "--brand":colors.brand_color,
     "--brand-strong":colors.brand_color,
     "--accent":colors.accent_color,
+    "--header-bg":colors.header_color,
+    "--header-text":colors.header_text_color,
+    "--header-hover":colors.header_hover_color,
+    "--button-text":colors.button_text_color,
+    "--button-hover":colors.button_hover_color,
   } as CSSProperties;
 }

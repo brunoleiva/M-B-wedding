@@ -9,6 +9,11 @@
   --brand: #65704d;
   --brand-strong: #4e5939;
   --accent: #a87655;
+  --header-bg: #211a16;
+  --header-text: #ffffff;
+  --header-hover: #c5b69f;
+  --button-text: #ffffff;
+  --button-hover: #4e5939;
   --line: #ded4c7;
   --danger: #9a3f3f;
   --radius-sm: 0.75rem;
@@ -89,6 +94,24 @@ body {
   outline: 3px solid color-mix(in srgb, var(--brand) 38%, transparent);
   outline-offset: 3px;
 }
+
+
+/* Consistent affordance for native actions and linked controls across public/admin. */
+a[href], button, summary, [role="button"], input[type="submit"], input[type="color"] {
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, border-color 180ms ease, opacity 180ms ease;
+}
+@media (hover:hover) {
+  button:not(:disabled):hover, input[type="submit"]:not(:disabled):hover, [role="button"]:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.09);
+    box-shadow: 0 6px 16px rgba(0,0,0,.13);
+  }
+  a[href]:hover { text-decoration-thickness: 2px; }
+}
+a[href]:active, button:not(:disabled):active, summary:active, input[type="submit"]:active { transform: scale(.975); }
+button:disabled, input[type="submit"]:disabled { cursor: not-allowed; opacity: .55; }
+a[href]:focus-visible, button:focus-visible, summary:focus-visible, input[type="submit"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *,

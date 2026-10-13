@@ -2,7 +2,7 @@ import { getAdminContext } from "@/services/admin/dashboard";
 import { getAppearance, getSavedDefaultColors, sections } from "@/services/wedding/appearance";
 import { saveAppearance } from "./actions";
 
-const labels = {background_color:"Fundo",surface_color:"Cards e superfícies",foreground_color:"Texto principal",brand_color:"Cor principal",accent_color:"Detalhes e destaques"};
+const labels = {background_color:"Fundo",surface_color:"Cards e superfícies",foreground_color:"Texto principal",brand_color:"Cor principal",accent_color:"Detalhes e destaques",header_color:"Fundo do header",header_text_color:"Texto do header",header_hover_color:"Hover do menu",button_text_color:"Texto dos botões principais",button_hover_color:"Hover dos botões principais"};
 export default async function AppearancePage({searchParams}:{searchParams:Promise<{saved?:string;error?:string}>}){
  const ctx=await getAdminContext();
  const appearance=await getAppearance(ctx?.weddingId);

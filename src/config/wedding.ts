@@ -17,8 +17,8 @@ export const weddingConfig = {
     initials: "M & B",
   },
   event: {
-    isoDate: "2027-10-24T16:00:00-03:00",
-    displayDate: "24 . 10 . 2027",
+    isoDate: "2027-12-17T16:00:00-03:00",
+    displayDate: "17 . 12 . 2027",
     city: "São Paulo",
     timezone: "America/Sao_Paulo",
   },

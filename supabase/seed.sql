@@ -5,7 +5,7 @@ insert into public.weddings (
   'm-b-wedding',
   'Maysa',
   'Bruno',
-  '2027-10-24 16:00:00-03',
+  '2027-12-17 16:00:00-03',
   'America/Sao_Paulo',
   'São Paulo',
   'Maysa & Bruno',
@@ -31,14 +31,14 @@ insert into public.story_events (wedding_id, year_label, title, description, sor
 ('11111111-1111-4111-8111-111111111111', '2027', 'O casamento', 'O capítulo que queremos escrever cercados pelas pessoas que fazem parte de nós.', 40);
 
 insert into public.venues (wedding_id, kind, name, starts_at, address, description) values
-('11111111-1111-4111-8111-111111111111', 'both', 'Local a definir', '2027-10-24 16:00:00-03', '', 'Em breve compartilharemos os detalhes do local.');
+('11111111-1111-4111-8111-111111111111', 'both', 'Local a definir', '2027-12-17 16:00:00-03', '', 'Em breve compartilharemos os detalhes do local.');
 
 insert into public.schedule_events (wedding_id, starts_at, title, sort_order) values
-('11111111-1111-4111-8111-111111111111', '2027-10-24 15:30:00-03', 'Chegada dos convidados', 10),
-('11111111-1111-4111-8111-111111111111', '2027-10-24 16:00:00-03', 'Cerimônia', 20),
-('11111111-1111-4111-8111-111111111111', '2027-10-24 17:30:00-03', 'Coquetel', 30),
-('11111111-1111-4111-8111-111111111111', '2027-10-24 18:30:00-03', 'Jantar', 40),
-('11111111-1111-4111-8111-111111111111', '2027-10-24 20:00:00-03', 'Festa', 50);
+('11111111-1111-4111-8111-111111111111', '2027-12-17 15:30:00-03', 'Chegada dos convidados', 10),
+('11111111-1111-4111-8111-111111111111', '2027-12-17 16:00:00-03', 'Cerimônia', 20),
+('11111111-1111-4111-8111-111111111111', '2027-12-17 17:30:00-03', 'Coquetel', 30),
+('11111111-1111-4111-8111-111111111111', '2027-12-17 18:30:00-03', 'Jantar', 40),
+('11111111-1111-4111-8111-111111111111', '2027-12-17 20:00:00-03', 'Festa', 50);
 
 insert into public.gift_categories (id, wedding_id, name, slug, sort_order) values
 ('21111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111', 'Lua de mel', 'lua-de-mel', 10)
