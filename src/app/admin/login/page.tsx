@@ -18,7 +18,7 @@ export default async function AdminLoginPage({
   return (
     <main className="grid min-h-screen place-items-center bg-[#eee8df] p-5">
       <section className="w-full max-w-md rounded-[2rem] border border-line bg-surface p-7 shadow-[var(--shadow-soft)] sm:p-9">
-        <Link href="/" className="font-editorial inline-grid size-14 place-items-center rounded-full border border-line text-lg">G & M</Link>
+        <Link href="/" className="font-editorial inline-grid size-14 place-items-center rounded-full border border-line text-lg">M & B</Link>
         <p className="eyebrow mt-8">Área privada</p>
         <h1 className="font-editorial mt-2 text-4xl">Painel dos noivos</h1>
         <p className="mt-3 text-sm leading-6 text-muted">Entre com uma conta cadastrada no Supabase Auth e vinculada como administradora do casamento.</p>

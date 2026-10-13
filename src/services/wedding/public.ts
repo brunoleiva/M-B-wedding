@@ -41,6 +41,6 @@ export async function getPublicWedding(): Promise<PublicWedding> {
     initials: `${wedding.first_name[0]} & ${wedding.second_name[0]}`,
     isoDate: wedding.event_at, displayDate: fmt.replaceAll("/", " . "), city: wedding.city,
     timezone, heroMessage: wedding.hero_subtitle || weddingConfig.hero.message, heroImage,
-    venue: venue ? { name: venue.name, time: time(venue.starts_at || wedding.event_at), address: venue.address, description: venue.description || "" } : fallback().venue,
+    venue: venue ? { name: venue.name, time: time(venue.starts_at || wedding.event_at), address: venue.address, description: venue.description || "" } : { name: "Local a definir", time: time(wedding.event_at), address: "", description: "Em breve compartilharemos os detalhes do local." },
   };
 }

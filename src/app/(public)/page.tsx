@@ -41,7 +41,7 @@ export default async function HomePage() {
             </div>
             <div className="p-8 sm:p-10">
               <p className="eyebrow">{wedding.venue.name}</p>
-              <h3 className="font-editorial mt-3 text-4xl">Celebraremos tudo no mesmo lugar</h3>
+              <h3 className="font-editorial mt-3 text-4xl">Os detalhes do nosso grande dia</h3>
               <p className="mt-5 leading-7 text-muted">{wedding.venue.description}</p>
               <p className="mt-5 text-sm font-semibold">{wedding.venue.address}</p>
               <Link href="/casamento" className="focus-ring mt-8 inline-flex rounded-full border border-foreground px-5 py-3 text-sm font-semibold transition hover:bg-foreground hover:text-white">

@@ -50,10 +50,26 @@ export async function saveWeddingSettings(form: FormData) {
     ...(heroImagePath ? { hero_image_path: heroImagePath } : {}),
   }).eq("id",context.weddingId);
   if (error) redirect("/admin/configuracoes?error=database");
-  const { data: venue } = await supabase.from("venues").select("id").eq("wedding_id",context.weddingId).order("created_at").limit(1).maybeSingle();
-  const venuePayload = {name: values.venueName, address: values.venueAddress, description: values.venueDescription, starts_at: eventAt};
-  const venueResult = venue ? await supabase.from("venues").update(venuePayload).eq("id",venue.id).eq("wedding_id",context.weddingId) : await supabase.from("venues").insert({...venuePayload, wedding_id:context.weddingId,kind:"both"});
-  if (venueResult.error) redirect("/admin/configuracoes?error=venue");
+  // Local ainda não definido: não criar registro fictício nem exigir preenchimento.
+  // Se houver um local antigo, despublicá-lo para não mostrar dados desatualizados.
+  const { data: venue, error: venueLookupError } = await supabase.from("venues")
+    .select("id").eq("wedding_id", context.weddingId).order("created_at").limit(1).maybeSingle();
+  if (venueLookupError) redirect("/admin/configuracoes?error=venue");
+  const hasVenue = Boolean(values.venueName && values.venueAddress);
+  if (!hasVenue && venue) {
+    const { error: hideError } = await supabase.from("venues")
+      .update({ is_published: false }).eq("id", venue.id).eq("wedding_id", context.weddingId);
+    if (hideError) redirect("/admin/configuracoes?error=venue");
+  } else if (hasVenue) {
+    const venuePayload = {
+      name: values.venueName, address: values.venueAddress,
+      description: values.venueDescription, starts_at: eventAt, is_published: true,
+    };
+    const venueResult = venue
+      ? await supabase.from("venues").update(venuePayload).eq("id", venue.id).eq("wedding_id", context.weddingId)
+      : await supabase.from("venues").insert({ ...venuePayload, wedding_id: context.weddingId, kind: "both" });
+    if (venueResult.error) redirect("/admin/configuracoes?error=venue");
+  }
   revalidatePath("/", "layout");
   redirect("/admin/configuracoes?saved=1");
 }

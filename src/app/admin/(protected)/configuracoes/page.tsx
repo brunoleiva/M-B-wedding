@@ -39,8 +39,9 @@ export default async function SettingsPage({ searchParams }: Props) {
         <p className="text-sm text-muted">Imagem atual: {wedding.hero_image_path || "não definida"}. Deixe o campo vazio para manter a imagem.</p>
       </fieldset>
       <fieldset className="grid gap-5"><legend className="mb-5 font-editorial text-3xl">Cerimônia e recepção</legend>
-        {field("venueName","Nome do local",venue?.name || "")}
-        {field("venueAddress","Endereço",venue?.address || "")}
+        <p className="text-sm text-muted">Ainda não definiram o local? Deixe os três campos abaixo vazios e salve normalmente. Para divulgar o local, informe nome e endereço.</p>
+        {field("venueName","Nome do local (opcional)",venue?.name || "",{required:false})}
+        {field("venueAddress","Endereço (opcional)",venue?.address || "",{required:false})}
         <label className="grid gap-2 text-sm font-semibold">Descrição<textarea name="venueDescription" maxLength={1000} defaultValue={venue?.description || ""} className="min-h-28 rounded-xl border border-line bg-white p-4 text-foreground"/></label>
       </fieldset>
       <button type="submit" className="focus-ring min-h-12 rounded-full bg-foreground px-7 font-semibold text-white hover:opacity-85">Salvar informações</button>

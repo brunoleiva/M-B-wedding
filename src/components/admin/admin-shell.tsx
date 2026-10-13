@@ -23,11 +23,11 @@ function AdminNav() {
   );
 }
 
-export function AdminShell({ children, email }: { children: React.ReactNode; email: string }) {
+export function AdminShell({ children, email, initials }: { children: React.ReactNode; email: string; initials: string }) {
   return (
     <div className="min-h-screen bg-[#f4f1ec] lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="hidden min-h-screen border-r border-line bg-[#24261f] p-6 text-white lg:block">
-        <Link href="/" className="font-editorial text-2xl">G & M</Link>
+        <Link href="/" className="font-editorial text-2xl">{initials}</Link>
         <p className="mt-2 text-xs text-white/50">Administração do casamento</p>
         <div className="mt-10"><AdminNav /></div>
       </aside>

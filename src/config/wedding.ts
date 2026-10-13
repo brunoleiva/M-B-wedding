@@ -12,9 +12,9 @@ export type ScheduleEvent = {
 
 export const weddingConfig = {
   couple: {
-    firstName: "Gabriel",
-    secondName: "Mariana",
-    initials: "G & M",
+    firstName: "Maysa",
+    secondName: "Bruno",
+    initials: "M & B",
   },
   event: {
     isoDate: "2027-10-24T16:00:00-03:00",
@@ -50,10 +50,10 @@ export const weddingConfig = {
     },
   ] satisfies StoryEvent[],
   venue: {
-    name: "Casa Jardim",
+    name: "Local a definir",
     time: "16:00",
-    address: "São Paulo — SP",
-    description: "Cerimônia e recepção no mesmo local, em um jardim preparado para receber vocês.",
+    address: "",
+    description: "Em breve compartilharemos os detalhes do local.",
   },
   schedule: [
     { time: "15:30", title: "Chegada dos convidados" },

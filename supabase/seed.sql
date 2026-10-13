@@ -2,13 +2,13 @@ insert into public.weddings (
   id, slug, first_name, second_name, event_at, timezone, city, hero_title, hero_subtitle, hero_image_path, is_published
 ) values (
   '11111111-1111-4111-8111-111111111111',
-  'gabriel-mariana',
-  'Gabriel',
-  'Mariana',
+  'm-b-wedding',
+  'Maysa',
+  'Bruno',
   '2027-10-24 16:00:00-03',
   'America/Sao_Paulo',
   'São Paulo',
-  'Gabriel & Mariana',
+  'Maysa & Bruno',
   'Estamos contando os dias para celebrar esse momento com vocês.',
   '/images/hero-placeholder.svg',
   true
@@ -31,7 +31,7 @@ insert into public.story_events (wedding_id, year_label, title, description, sor
 ('11111111-1111-4111-8111-111111111111', '2027', 'O casamento', 'O capítulo que queremos escrever cercados pelas pessoas que fazem parte de nós.', 40);
 
 insert into public.venues (wedding_id, kind, name, starts_at, address, description) values
-('11111111-1111-4111-8111-111111111111', 'both', 'Casa Jardim', '2027-10-24 16:00:00-03', 'São Paulo — SP', 'Cerimônia e recepção no mesmo local, em um jardim preparado para receber vocês.');
+('11111111-1111-4111-8111-111111111111', 'both', 'Local a definir', '2027-10-24 16:00:00-03', '', 'Em breve compartilharemos os detalhes do local.');
 
 insert into public.schedule_events (wedding_id, starts_at, title, sort_order) values
 ('11111111-1111-4111-8111-111111111111', '2027-10-24 15:30:00-03', 'Chegada dos convidados', 10),
