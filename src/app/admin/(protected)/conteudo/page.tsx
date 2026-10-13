@@ -1,2 +1,16 @@
-import { SectionPlaceholder } from "@/components/admin/section-placeholder";
-export default function Page() { return <SectionPlaceholder eyebrow="CMS" title="Conteúdo do site" description="Base para editar o conteúdo público sem alterar código." bullets={["Casal e hero", "História", "Locais e cronograma", "FAQ e seções ativas"]} />; }
+import { getAdminContext } from "@/services/admin/dashboard";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { saveStory, removeStory } from "./actions";
+import Link from "next/link";
+
+export default async function StoryAdmin({searchParams}:{searchParams:Promise<{error?:string;saved?:string;removed?:string}>}) {
+  const ctx = await getAdminContext();
+  const supabase = await createSupabaseServerClient();
+  const {data: events} = ctx && supabase ? await supabase.from("story_events").select("id,title,description,year_label,sort_order,is_published").eq("wedding_id",ctx.weddingId).order("sort_order").order("created_at") : {data:[]};
+  const params = await searchParams;
+  return <div className="space-y-8"><div><p className="eyebrow">Conteúdo</p><h1 className="font-editorial text-5xl">Nossa história</h1><p className="mt-2 text-muted">Cadastre e ordene os momentos do casal. Somente momentos publicados aparecem no site.</p><Link className="mt-3 inline-block underline" href="/historia">Ver página pública</Link></div>
+  {params.error && <p role="alert" className="text-red-700">Não foi possível salvar. Confira os campos e tente novamente.</p>}
+  {(params.saved || params.removed) && <p role="status" className="text-green-700">Alterações salvas com sucesso.</p>}
+  <form action={saveStory} className="card-soft grid gap-4 p-6"><h2 className="text-xl font-semibold">Adicionar momento</h2><label>Título *<input className="w-full rounded-lg border p-3" name="title" required maxLength={150}/></label><label>Ano ou data (texto opcional)<input className="w-full rounded-lg border p-3" name="year" maxLength={24} placeholder="2025"/></label><label>Descrição<textarea className="w-full rounded-lg border p-3" name="description" maxLength={3000} rows={3}/></label><label>Ordem<input type="number" min={0} max={100000} defaultValue={0} name="sort" className="w-full rounded-lg border p-3"/></label><label><input type="checkbox" name="published" defaultChecked/> Publicado</label><button className="rounded-full bg-brand px-6 py-3 text-white" type="submit">Adicionar momento</button></form>
+  <div className="space-y-5">{(events??[]).map(event=><article key={event.id} className="card-soft p-6"><form action={saveStory} className="grid gap-3"><input type="hidden" name="id" value={event.id}/><label>Título<input className="w-full rounded-lg border p-3" required maxLength={150} name="title" defaultValue={event.title}/></label><label>Ano<input className="w-full rounded-lg border p-3" name="year" maxLength={24} defaultValue={event.year_label??""}/></label><label>Descrição<textarea className="w-full rounded-lg border p-3" name="description" maxLength={3000} rows={3} defaultValue={event.description}/></label><label>Ordem<input className="w-full rounded-lg border p-3" type="number" min={0} max={100000} name="sort" defaultValue={event.sort_order}/></label><label><input type="checkbox" name="published" defaultChecked={event.is_published}/> Publicado</label><button className="rounded-full border px-4 py-3" type="submit">Salvar momento</button></form><form className="mt-3" action={removeStory}><input type="hidden" name="id" value={event.id}/><button className="text-red-700 underline" type="submit">Excluir momento</button></form></article>)}{!events?.length && <p className="text-muted">Nenhum momento cadastrado ainda.</p>}</div></div>;
+}

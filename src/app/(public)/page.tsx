@@ -4,10 +4,13 @@ import { HeroSection } from "@/components/public/hero-section";
 import { StoryTimeline } from "@/components/public/story-timeline";
 import { SectionTitle } from "@/components/ui/section-title";
 import { weddingConfig } from "@/config/wedding";
+import { getPublicContent } from "@/services/wedding/content";
+import { PhotoGallery } from "@/components/public/photo-gallery";
 import { getPublicWedding } from "@/services/wedding/public";
 
 export default async function HomePage() {
   const wedding = await getPublicWedding();
+  const {story,gallery} = await getPublicContent();
   return (
     <>
       <HeroSection wedding={wedding} />
@@ -26,9 +29,11 @@ export default async function HomePage() {
             title="Alguns capítulos antes do sim"
             description="Entre encontros, viagens, escolhas e planos, fomos construindo uma vida que agora queremos celebrar com vocês."
           />
-          <StoryTimeline events={[...weddingConfig.story]} />
+          <StoryTimeline events={story} />
         </div>
       </section>
+
+      {gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
 
       <section id="casamento" className="section-space scroll-mt-20 bg-[#e9e1d6]">
         <div className="page-shell">
