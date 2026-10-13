@@ -6,6 +6,7 @@ const navigation = [
   ["O casamento", "/#casamento"],
   ["Presentes", "/presentes"],
   ["Informações", "/informacoes"],
+  ["Padrinhos", "/padrinhos"],
 ] as const;
 
 export function PublicHeader({ wedding }: { wedding: PublicWedding }) {

@@ -5,6 +5,7 @@ const items = [
   ["Visão geral", "/admin"],
   ["Conteúdo", "/admin/conteudo"],
   ["Cerimônia e cronograma", "/admin/casamento"],
+  ["Padrinhos e informações", "/admin/informacoes"],
   ["Convidados", "/admin/convidados"],
   ["RSVP", "/admin/rsvp"],
   ["Presentes", "/admin/presentes"],
