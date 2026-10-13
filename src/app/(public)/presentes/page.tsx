@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { getAppearance } from "@/services/wedding/appearance";
 import { SectionTitle } from "@/components/ui/section-title";
 
 const gifts = [
@@ -9,7 +11,8 @@ const gifts = [
 
 export const metadata = { title: "Presentes" };
 
-export default function GiftsPage() {
+export default async function GiftsPage() {
+  if (!(await getAppearance()).visible.presentes) notFound();
   return (
     <section className="section-space pt-32">
       <div className="page-shell">

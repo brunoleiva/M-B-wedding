@@ -8,9 +8,11 @@ import { getPublishedEventDetails } from "@/services/wedding/event-details";
 import { getPublicContent } from "@/services/wedding/content";
 import { PhotoGallery } from "@/components/public/photo-gallery";
 import { getPublicWedding } from "@/services/wedding/public";
+import { getAppearance } from "@/services/wedding/appearance";
 
 export default async function HomePage() {
   const wedding = await getPublicWedding();
+  const {visible} = await getAppearance();
   const {story,gallery} = await getPublicContent();
   const {venues, schedule, timezone} = await getPublishedEventDetails();
   return (
@@ -23,7 +25,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="historia" className="section-space scroll-mt-20">
+      {visible.historia && <section id="historia" className="section-space scroll-mt-20">
         <div className="page-shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
           <SectionTitle
             align="left"
@@ -33,15 +35,15 @@ export default async function HomePage() {
           />
           <StoryTimeline events={story} />
         </div>
-      </section>
+      </section>}
 
-      {gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
+      {visible.fotos && gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
 
-      {(venues.length > 0 || schedule.length > 0) && <section id="casamento" className="section-space scroll-mt-20 bg-[#e9e1d6]">
+      {visible.casamento && (venues.length > 0 || schedule.length > 0) && <section id="casamento" className="section-space scroll-mt-20 bg-surface-muted">
         <div className="page-shell"><SectionTitle eyebrow="O casamento" title="Um dia para guardar para sempre" /><div className="mt-12"><WeddingDetails venues={venues} schedule={schedule} timezone={timezone} compact /></div><Link href="/casamento" className="mt-8 inline-block underline">Ver todos os detalhes</Link></div>
       </section>}
 
-      <section className="section-space bg-[#3e4731] text-white">
+      {visible.rsvp && <section className="section-space bg-brand text-white">
         <div className="page-shell grid items-center gap-10 lg:grid-cols-[1.15fr_.85fr]">
           <div>
             <p className="text-xs font-bold tracking-[0.2em] text-white/65 uppercase">Presença</p>
@@ -52,7 +54,7 @@ export default async function HomePage() {
             <Link href="/rsvp" className="focus-ring mt-7 inline-flex min-h-12 items-center rounded-full bg-white px-6 text-sm font-bold text-foreground transition hover:bg-[#efe8dd]">Confirmar presença</Link>
           </div>
         </div>
-      </section>
+      </section>}
     </>
   );
 }

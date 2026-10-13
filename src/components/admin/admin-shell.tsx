@@ -11,6 +11,7 @@ const items = [
   ["Presentes", "/admin/presentes"],
   ["Galeria", "/admin/galeria"],
   ["Configurações", "/admin/configuracoes"],
+  ["Aparência e seções", "/admin/aparencia"],
 ] as const;
 
 function AdminNav() {

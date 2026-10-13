@@ -1,8 +1,11 @@
+import { notFound } from "next/navigation";
+import { getAppearance } from "@/services/wedding/appearance";
 import { SectionTitle } from "@/components/ui/section-title";
 
 export const metadata = { title: "Recados" };
 
-export default function MessagesPage() {
+export default async function MessagesPage() {
+  if (!(await getAppearance()).visible.recados) notFound();
   return (
     <section className="section-space pt-32">
       <div className="page-shell max-w-4xl">

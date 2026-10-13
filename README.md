@@ -107,3 +107,12 @@ Acesse `/admin/configuracoes` para alterar os nomes, data, horário, fuso, cidad
 **Atenção:** a história e o cronograma continuam usando conteúdo fictício centralizado; suas edições estarão disponíveis em uma etapa posterior. Se não houver casamento publicado, o site ainda usa o exemplo local como fallback.
 
 Depois de subir as alterações ao GitHub e aplicar a migration, confirme `npm run check` no ambiente com dependências instaladas e redeploy na Vercel.
+
+
+### Fase 6 — Aparência e visibilidade
+
+Execute a migration `202610130005_appearance.sql` no Supabase antes de publicar a Fase 6.
+Em `/admin/aparencia`, administradores podem alterar cinco cores e ligar/desligar
+seções. As alterações afetam o site público e não excluem dados das seções ocultas.
+Para conferir: desative uma seção, salve, abra a Home e tente acessar sua rota
+diretamente (deverá retornar 404). Reative-a para recuperar o conteúdo.

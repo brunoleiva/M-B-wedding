@@ -1,7 +1,10 @@
+import { notFound } from "next/navigation";
+import { getAppearance } from "@/services/wedding/appearance";
 import { SectionTitle } from "@/components/ui/section-title";
 import { getPublicGuestInformation } from "@/services/wedding/guest-information";
 export const metadata={title:"Informações para convidados"};
 export default async function InfoPage(){
+ if(!(await getAppearance()).visible.informacoes) notFound();
  const {info,faqs,hotels}=await getPublicGuestInformation();
  const hasDress=Boolean(info?.dress_title||info?.dress_description||info?.colors_to_avoid);
  const hasTransport=Boolean(info?.transport_text||info?.parking_text);

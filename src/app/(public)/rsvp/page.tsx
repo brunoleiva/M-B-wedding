@@ -1,8 +1,11 @@
+import { notFound } from "next/navigation";
+import { getAppearance } from "@/services/wedding/appearance";
 import { SectionTitle } from "@/components/ui/section-title";
 
 export const metadata = { title: "Confirmar presença" };
 
-export default function RsvpPage() {
+export default async function RsvpPage() {
+  if (!(await getAppearance()).visible.rsvp) notFound();
   return (
     <section className="section-space pt-32">
       <div className="page-shell max-w-3xl">

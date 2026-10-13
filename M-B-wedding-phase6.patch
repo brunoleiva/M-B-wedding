@@ -1,0 +1,508 @@
+diff --git a/README.md b/README.md
+index a853998..193fb7f 100644
+--- a/README.md
++++ b/README.md
+@@ -107,3 +107,12 @@ Acesse `/admin/configuracoes` para alterar os nomes, data, horário, fuso, cidad
+ **Atenção:** a história e o cronograma continuam usando conteúdo fictício centralizado; suas edições estarão disponíveis em uma etapa posterior. Se não houver casamento publicado, o site ainda usa o exemplo local como fallback.
+ 
+ Depois de subir as alterações ao GitHub e aplicar a migration, confirme `npm run check` no ambiente com dependências instaladas e redeploy na Vercel.
++
++
++### Fase 6 — Aparência e visibilidade
++
++Execute a migration `202610130005_appearance.sql` no Supabase antes de publicar a Fase 6.
++Em `/admin/aparencia`, administradores podem alterar cinco cores e ligar/desligar
++seções. As alterações afetam o site público e não excluem dados das seções ocultas.
++Para conferir: desative uma seção, salve, abra a Home e tente acessar sua rota
++diretamente (deverá retornar 404). Reative-a para recuperar o conteúdo.
+diff --git a/src/app/(public)/casamento/page.tsx b/src/app/(public)/casamento/page.tsx
+index 7c61df3..b56f15b 100644
+--- a/src/app/(public)/casamento/page.tsx
++++ b/src/app/(public)/casamento/page.tsx
+@@ -1,3 +1,5 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ import { WeddingDetails } from "@/components/public/wedding-details";
+ import { getPublishedEventDetails } from "@/services/wedding/event-details";
+@@ -5,6 +7,7 @@ import { getPublishedEventDetails } from "@/services/wedding/event-details";
+ export const metadata = { title: "O casamento" };
+ 
+ export default async function WeddingPage() {
++  if(!(await getAppearance()).visible.casamento) notFound();
+   const {venues, schedule, timezone} = await getPublishedEventDetails();
+   return <section className="section-space pt-32"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="O casamento" title="Tudo o que você precisa saber" description="Os detalhes para celebrarmos juntos." />
+     <div className="mt-12">{venues.length || schedule.length ? <WeddingDetails venues={venues} schedule={schedule} timezone={timezone}/> : <div className="card-soft p-10 text-center text-muted">Em breve compartilharemos os detalhes da cerimônia e da festa.</div>}</div>
+diff --git a/src/app/(public)/fotos/page.tsx b/src/app/(public)/fotos/page.tsx
+index ee7e806..941ac62 100644
+--- a/src/app/(public)/fotos/page.tsx
++++ b/src/app/(public)/fotos/page.tsx
+@@ -1,5 +1,8 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ import { PhotoGallery } from "@/components/public/photo-gallery";
+ import { getPublicContent } from "@/services/wedding/content";
+ export const metadata = {title:"Galeria de fotos"};
+-export default async function PhotosPage(){const {gallery}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos" description="Um pouquinho da nossa história em imagens."/><div className="mt-12">{gallery.length?<PhotoGallery photos={gallery}/>:<p className="text-center text-muted">Em breve, nossas fotos estarão aqui.</p>}</div></div></section>}
++export default async function PhotosPage(){
++ if(!(await getAppearance()).visible.fotos) notFound();const {gallery}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos" description="Um pouquinho da nossa história em imagens."/><div className="mt-12">{gallery.length?<PhotoGallery photos={gallery}/>:<p className="text-center text-muted">Em breve, nossas fotos estarão aqui.</p>}</div></div></section>}
+diff --git a/src/app/(public)/historia/page.tsx b/src/app/(public)/historia/page.tsx
+index b6ac29e..7e274a6 100644
+--- a/src/app/(public)/historia/page.tsx
++++ b/src/app/(public)/historia/page.tsx
+@@ -1,5 +1,8 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { StoryTimeline } from "@/components/public/story-timeline";
+ import { SectionTitle } from "@/components/ui/section-title";
+ import { getPublicContent } from "@/services/wedding/content";
+ export const metadata={title:"Nossa história"};
+-export default async function StoryPage(){const {story}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell max-w-4xl"><SectionTitle eyebrow="Nossa história" title="Antes do grande dia" description="Os momentos que nos trouxeram até aqui."/><StoryTimeline events={story}/></div></section>}
++export default async function StoryPage(){
++ if(!(await getAppearance()).visible.historia) notFound();const {story}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell max-w-4xl"><SectionTitle eyebrow="Nossa história" title="Antes do grande dia" description="Os momentos que nos trouxeram até aqui."/><StoryTimeline events={story}/></div></section>}
+diff --git a/src/app/(public)/informacoes/page.tsx b/src/app/(public)/informacoes/page.tsx
+index 6021c58..d395064 100644
+--- a/src/app/(public)/informacoes/page.tsx
++++ b/src/app/(public)/informacoes/page.tsx
+@@ -1,7 +1,10 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ import { getPublicGuestInformation } from "@/services/wedding/guest-information";
+ export const metadata={title:"Informações para convidados"};
+ export default async function InfoPage(){
++ if(!(await getAppearance()).visible.informacoes) notFound();
+  const {info,faqs,hotels}=await getPublicGuestInformation();
+  const hasDress=Boolean(info?.dress_title||info?.dress_description||info?.colors_to_avoid);
+  const hasTransport=Boolean(info?.transport_text||info?.parking_text);
+diff --git a/src/app/(public)/layout.tsx b/src/app/(public)/layout.tsx
+index 7edfd36..faf6953 100644
+--- a/src/app/(public)/layout.tsx
++++ b/src/app/(public)/layout.tsx
+@@ -1,14 +1,16 @@
+ import { PublicFooter } from "@/components/public/public-footer";
+ import { getPublicWedding } from "@/services/wedding/public";
+ import { PublicHeader } from "@/components/public/public-header";
++import { getAppearance, appearanceStyle } from "@/services/wedding/appearance";
+ 
+ export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+   const wedding = await getPublicWedding();
++  const appearance = await getAppearance();
+   return (
+-    <>
+-      <PublicHeader wedding={wedding} />
++    <div style={appearanceStyle(appearance.colors)} className="min-h-screen bg-background text-foreground">
++      <PublicHeader wedding={wedding} visible={appearance.visible} />
+       <main>{children}</main>
+-      <PublicFooter wedding={wedding} />
+-    </>
++      <PublicFooter wedding={wedding} visible={appearance.visible} />
++    </div>
+   );
+ }
+diff --git a/src/app/(public)/padrinhos/page.tsx b/src/app/(public)/padrinhos/page.tsx
+index 1294b53..7afdbef 100644
+--- a/src/app/(public)/padrinhos/page.tsx
++++ b/src/app/(public)/padrinhos/page.tsx
+@@ -1,8 +1,11 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import Image from "next/image";
+ import { SectionTitle } from "@/components/ui/section-title";
+ import { getPublicGuestInformation } from "@/services/wedding/guest-information";
+ export const metadata={title:"Padrinhos e pessoas especiais"};
+ export default async function PeoplePage(){
++ if(!(await getAppearance()).visible.padrinhos) notFound();
+  const {people}=await getPublicGuestInformation();
+  return <section className="section-space pt-32"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="Pessoas especiais" title="Quem caminha ao nosso lado" description="Pessoas queridas que fazem parte da nossa história."/>
+  {people.length===0?<p className="mt-12 text-center text-muted">Em breve apresentaremos nossas pessoas especiais.</p>:<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{people.map(p=><article key={p.id} className="card-soft overflow-hidden">{p.image_url&&<div className="relative aspect-[4/5]"><Image src={p.image_url} alt={`Foto de ${p.name}`} fill unoptimized className="object-cover" sizes="(max-width: 640px) 100vw, 33vw"/></div>}<div className="p-6"><p className="text-xs uppercase tracking-widest text-muted">{p.category} · {p.role_label}</p><h2 className="font-editorial mt-2 text-3xl">{p.name}</h2>{p.description&&<p className="mt-3 whitespace-pre-line text-muted">{p.description}</p>}</div></article>)}</div>}
+diff --git a/src/app/(public)/page.tsx b/src/app/(public)/page.tsx
+index 75098dd..80cfd70 100644
+--- a/src/app/(public)/page.tsx
++++ b/src/app/(public)/page.tsx
+@@ -8,9 +8,11 @@ import { getPublishedEventDetails } from "@/services/wedding/event-details";
+ import { getPublicContent } from "@/services/wedding/content";
+ import { PhotoGallery } from "@/components/public/photo-gallery";
+ import { getPublicWedding } from "@/services/wedding/public";
++import { getAppearance } from "@/services/wedding/appearance";
+ 
+ export default async function HomePage() {
+   const wedding = await getPublicWedding();
++  const {visible} = await getAppearance();
+   const {story,gallery} = await getPublicContent();
+   const {venues, schedule, timezone} = await getPublishedEventDetails();
+   return (
+@@ -23,7 +25,7 @@ export default async function HomePage() {
+         </div>
+       </section>
+ 
+-      <section id="historia" className="section-space scroll-mt-20">
++      {visible.historia && <section id="historia" className="section-space scroll-mt-20">
+         <div className="page-shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+           <SectionTitle
+             align="left"
+@@ -33,15 +35,15 @@ export default async function HomePage() {
+           />
+           <StoryTimeline events={story} />
+         </div>
+-      </section>
++      </section>}
+ 
+-      {gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
++      {visible.fotos && gallery.length>0 && <section id="fotos" className="section-space bg-surface"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos"/><div className="mt-10"><PhotoGallery photos={gallery.slice(0,8)}/></div><Link href="/fotos" className="mt-6 inline-block underline">Ver todas as fotos</Link></div></section>}
+ 
+-      {(venues.length > 0 || schedule.length > 0) && <section id="casamento" className="section-space scroll-mt-20 bg-[#e9e1d6]">
++      {visible.casamento && (venues.length > 0 || schedule.length > 0) && <section id="casamento" className="section-space scroll-mt-20 bg-surface-muted">
+         <div className="page-shell"><SectionTitle eyebrow="O casamento" title="Um dia para guardar para sempre" /><div className="mt-12"><WeddingDetails venues={venues} schedule={schedule} timezone={timezone} compact /></div><Link href="/casamento" className="mt-8 inline-block underline">Ver todos os detalhes</Link></div>
+       </section>}
+ 
+-      <section className="section-space bg-[#3e4731] text-white">
++      {visible.rsvp && <section className="section-space bg-brand text-white">
+         <div className="page-shell grid items-center gap-10 lg:grid-cols-[1.15fr_.85fr]">
+           <div>
+             <p className="text-xs font-bold tracking-[0.2em] text-white/65 uppercase">Presença</p>
+@@ -52,7 +54,7 @@ export default async function HomePage() {
+             <Link href="/rsvp" className="focus-ring mt-7 inline-flex min-h-12 items-center rounded-full bg-white px-6 text-sm font-bold text-foreground transition hover:bg-[#efe8dd]">Confirmar presença</Link>
+           </div>
+         </div>
+-      </section>
++      </section>}
+     </>
+   );
+ }
+diff --git a/src/app/(public)/presentes/page.tsx b/src/app/(public)/presentes/page.tsx
+index 3f6c218..39008be 100644
+--- a/src/app/(public)/presentes/page.tsx
++++ b/src/app/(public)/presentes/page.tsx
+@@ -1,3 +1,5 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ 
+ const gifts = [
+@@ -9,7 +11,8 @@ const gifts = [
+ 
+ export const metadata = { title: "Presentes" };
+ 
+-export default function GiftsPage() {
++export default async function GiftsPage() {
++  if (!(await getAppearance()).visible.presentes) notFound();
+   return (
+     <section className="section-space pt-32">
+       <div className="page-shell">
+diff --git a/src/app/(public)/recados/page.tsx b/src/app/(public)/recados/page.tsx
+index 0723dcf..4732e85 100644
+--- a/src/app/(public)/recados/page.tsx
++++ b/src/app/(public)/recados/page.tsx
+@@ -1,8 +1,11 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ 
+ export const metadata = { title: "Recados" };
+ 
+-export default function MessagesPage() {
++export default async function MessagesPage() {
++  if (!(await getAppearance()).visible.recados) notFound();
+   return (
+     <section className="section-space pt-32">
+       <div className="page-shell max-w-4xl">
+diff --git a/src/app/(public)/rsvp/page.tsx b/src/app/(public)/rsvp/page.tsx
+index 0f0bb86..d2123c0 100644
+--- a/src/app/(public)/rsvp/page.tsx
++++ b/src/app/(public)/rsvp/page.tsx
+@@ -1,8 +1,11 @@
++import { notFound } from "next/navigation";
++import { getAppearance } from "@/services/wedding/appearance";
+ import { SectionTitle } from "@/components/ui/section-title";
+ 
+ export const metadata = { title: "Confirmar presença" };
+ 
+-export default function RsvpPage() {
++export default async function RsvpPage() {
++  if (!(await getAppearance()).visible.rsvp) notFound();
+   return (
+     <section className="section-space pt-32">
+       <div className="page-shell max-w-3xl">
+diff --git a/src/app/admin/(protected)/aparencia/actions.ts b/src/app/admin/(protected)/aparencia/actions.ts
+new file mode 100644
+index 0000000..3751202
+--- /dev/null
++++ b/src/app/admin/(protected)/aparencia/actions.ts
+@@ -0,0 +1,30 @@
++"use server";
++import { redirect } from "next/navigation";
++import { revalidatePath } from "next/cache";
++import { getAdminContext } from "@/services/admin/dashboard";
++import { createSupabaseServerClient } from "@/lib/supabase/server";
++import { defaultColors, sections, type ColorKey } from "@/services/wedding/appearance";
++
++export async function saveAppearance(form:FormData){
++ const ctx=await getAdminContext();
++ if(!ctx)redirect("/admin/login?error=unauthorized");
++ const db=await createSupabaseServerClient();
++ if(!db)redirect("/admin/aparencia?error=database");
++ const colors={...defaultColors};
++ for(const key of Object.keys(colors) as ColorKey[]){
++   const value=form.get(key);
++   if(typeof value!=="string" || !/^#[0-9a-fA-F]{6}$/.test(value))redirect("/admin/aparencia?error=colors");
++   colors[key]=value;
++ }
++ const enabled=form.getAll("visible").filter((x):x is string=>typeof x==="string");
++ if(enabled.some(x=>!sections.some(s=>s.key===x)))redirect("/admin/aparencia?error=sections");
++ const {error:themeError}=await db.from("wedding_appearance").upsert({wedding_id:ctx.weddingId,...colors},{onConflict:"wedding_id"});
++ if(themeError)redirect("/admin/aparencia?error=database");
++ const {error:sectionError}=await db.from("site_sections").upsert(
++   sections.map((s,index)=>({wedding_id:ctx.weddingId,key:s.key,label:s.title,is_enabled:enabled.includes(s.key),sort_order:index})),
++   {onConflict:"wedding_id,key"}
++ );
++ if(sectionError)redirect("/admin/aparencia?error=sections_database");
++ revalidatePath("/", "layout");
++ redirect("/admin/aparencia?saved=1");
++}
+diff --git a/src/app/admin/(protected)/aparencia/page.tsx b/src/app/admin/(protected)/aparencia/page.tsx
+new file mode 100644
+index 0000000..b0950c0
+--- /dev/null
++++ b/src/app/admin/(protected)/aparencia/page.tsx
+@@ -0,0 +1,24 @@
++import { getAdminContext } from "@/services/admin/dashboard";
++import { getAppearance, sections } from "@/services/wedding/appearance";
++import { saveAppearance } from "./actions";
++
++const labels = {background_color:"Fundo",surface_color:"Cards e superfícies",foreground_color:"Texto principal",brand_color:"Cor principal",accent_color:"Detalhes e destaques"};
++export default async function AppearancePage({searchParams}:{searchParams:Promise<{saved?:string;error?:string}>}){
++ const ctx=await getAdminContext();
++ const appearance=await getAppearance(ctx?.weddingId);
++ const params=await searchParams;
++ return <div className="mx-auto max-w-4xl space-y-8">
++   <header><p className="eyebrow">Personalização</p><h1 className="font-editorial mt-3 text-4xl">Aparência e seções</h1><p className="mt-2 text-muted">Personalize as cores e escolha o que os convidados podem acessar.</p></header>
++   {params.saved&&<p role="status" className="rounded-xl border border-brand p-4">Alterações salvas. O site público já utiliza essas configurações.</p>}
++   {params.error&&<p role="alert" className="rounded-xl border border-danger p-4 text-danger">Não foi possível salvar ({params.error}). Verifique os campos e tente novamente.</p>}
++   <form action={saveAppearance} className="space-y-8">
++     <section className="card-soft space-y-6 p-6"><h2 className="font-editorial text-3xl">Cores do site</h2><p className="text-sm text-muted">O painel administrativo mantém sua aparência para facilitar a leitura.</p>
++       <div className="grid gap-4 sm:grid-cols-2">{(Object.entries(labels) as [keyof typeof labels,string][]).map(([key,label])=><label key={key} className="flex items-center gap-4 rounded-xl border border-line p-3"><input aria-label={label} name={key} type="color" defaultValue={appearance.colors[key]} className="h-12 w-16 cursor-pointer rounded border border-line"/><span className="font-medium">{label}</span></label>)}</div>
++     </section>
++     <section className="card-soft space-y-5 p-6"><h2 className="font-editorial text-3xl">Seções visíveis</h2><p className="text-sm text-muted">Se uma seção for desativada, ela desaparece do menu, da Home e de sua página pública. Os dados cadastrados são preservados.</p>
++       <div className="grid gap-3 sm:grid-cols-2">{sections.map(s=><label key={s.key} className="flex items-center gap-3 rounded-xl border border-line p-4"><input type="checkbox" name="visible" value={s.key} defaultChecked={appearance.visible[s.key]} className="size-5 accent-brand"/><span>{s.title}</span></label>)}</div>
++     </section>
++     <button type="submit" className="focus-ring min-h-12 rounded-full bg-brand px-8 font-semibold text-white">Salvar personalização</button>
++   </form>
++ </div>;
++}
+diff --git a/src/components/admin/admin-shell.tsx b/src/components/admin/admin-shell.tsx
+index 793ab9f..8657a94 100644
+--- a/src/components/admin/admin-shell.tsx
++++ b/src/components/admin/admin-shell.tsx
+@@ -11,6 +11,7 @@ const items = [
+   ["Presentes", "/admin/presentes"],
+   ["Galeria", "/admin/galeria"],
+   ["Configurações", "/admin/configuracoes"],
++  ["Aparência e seções", "/admin/aparencia"],
+ ] as const;
+ 
+ function AdminNav() {
+diff --git a/src/components/public/public-footer.tsx b/src/components/public/public-footer.tsx
+index 82a23c2..9016662 100644
+--- a/src/components/public/public-footer.tsx
++++ b/src/components/public/public-footer.tsx
+@@ -1,9 +1,10 @@
+ import Link from "next/link";
+ import type { PublicWedding } from "@/services/wedding/public";
++import type { Appearance } from "@/services/wedding/appearance";
+ 
+-export function PublicFooter({ wedding }: { wedding: PublicWedding }) {
++export function PublicFooter({ wedding, visible }: { wedding: PublicWedding; visible: Appearance["visible"] }) {
+   return (
+-    <footer className="border-t border-line bg-[#efe7dc] py-14">
++    <footer className="border-t border-line bg-surface-muted py-14">
+       <div className="page-shell flex flex-col items-center justify-between gap-7 text-center sm:flex-row sm:text-left">
+         <div>
+           <p className="font-editorial text-3xl">
+@@ -12,9 +13,9 @@ export function PublicFooter({ wedding }: { wedding: PublicWedding }) {
+           <p className="mt-2 text-sm text-muted">{wedding.displayDate} · Feito com amor ♥</p>
+         </div>
+         <div className="flex gap-5 text-sm text-muted">
+-          <Link href="/rsvp" className="focus-ring rounded hover:text-foreground">RSVP</Link>
+-          <Link href="/presentes" className="focus-ring rounded hover:text-foreground">Presentes</Link>
+-          <Link href="/informacoes" className="focus-ring rounded hover:text-foreground">Informações</Link>
++          {visible.rsvp && <Link href="/rsvp" className="focus-ring rounded hover:text-foreground">RSVP</Link>}
++          {visible.presentes && <Link href="/presentes" className="focus-ring rounded hover:text-foreground">Presentes</Link>}
++          {visible.informacoes && <Link href="/informacoes" className="focus-ring rounded hover:text-foreground">Informações</Link>}
+         </div>
+       </div>
+     </footer>
+diff --git a/src/components/public/public-header.tsx b/src/components/public/public-header.tsx
+index 9c634db..39b87ed 100644
+--- a/src/components/public/public-header.tsx
++++ b/src/components/public/public-header.tsx
+@@ -1,56 +1,19 @@
+ import Link from "next/link";
+ import type { PublicWedding } from "@/services/wedding/public";
++import { sections, type Appearance } from "@/services/wedding/appearance";
+ 
+-const navigation = [
+-  ["Nossa história", "/#historia"],
+-  ["O casamento", "/#casamento"],
+-  ["Presentes", "/presentes"],
+-  ["Informações", "/informacoes"],
+-  ["Padrinhos", "/padrinhos"],
+-] as const;
+-
+-export function PublicHeader({ wedding }: { wedding: PublicWedding }) {
+-  return (
+-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[#211a16]/45 text-white backdrop-blur-xl">
+-      <div className="page-shell flex h-[4.5rem] items-center justify-between gap-4">
+-        <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">
+-          <span className="font-editorial grid size-10 place-items-center rounded-full border border-white/35 text-sm">
+-            {wedding.initials}
+-          </span>
+-          <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">
+-            {wedding.firstName} & {wedding.secondName}
+-          </span>
+-        </Link>
+-
+-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Navegação principal">
+-          {navigation.map(([label, href]) => (
+-            <Link key={href} href={href} className="focus-ring rounded text-sm text-white/80 transition hover:text-white">
+-              {label}
+-            </Link>
+-          ))}
+-        </nav>
+-
+-        <div className="flex items-center gap-2">
+-          <Link
+-            href="/rsvp"
+-            className="focus-ring hidden rounded-full bg-white px-4 py-2.5 text-xs font-bold tracking-wide text-foreground uppercase transition hover:bg-[#f1eadf] sm:inline-flex sm:px-5"
+-          >
+-            Confirmar presença
+-          </Link>
+-          <details className="relative lg:hidden">
+-            <summary className="focus-ring cursor-pointer list-none rounded-full border border-white/35 px-4 py-2.5 text-xs font-bold uppercase">
+-              Menu
+-            </summary>
+-            <nav className="absolute right-0 mt-3 w-64 rounded-2xl border border-white/15 bg-[#211a16]/95 p-3 shadow-2xl backdrop-blur-xl" aria-label="Navegação mobile">
+-              {[...navigation, ["Confirmar presença", "/rsvp"] as const].map(([label, href]) => (
+-                <Link key={href} href={href} className="focus-ring block rounded-xl px-3 py-3 text-sm text-white/85 hover:bg-white/10 hover:text-white">
+-                  {label}
+-                </Link>
+-              ))}
+-            </nav>
+-          </details>
+-        </div>
+-      </div>
+-    </header>
+-  );
++export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; visible: Appearance["visible"] }) {
++  const navigation=sections.filter(s=>visible[s.key]).map(s=>({label:s.title,href:s.href}));
++  return <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[#211a16]/80 text-white backdrop-blur-xl">
++    <div className="page-shell flex h-[4.5rem] items-center justify-between gap-4">
++      <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">
++        <span className="font-editorial grid size-10 place-items-center rounded-full border border-white/35 text-sm">{wedding.initials}</span>
++        <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">{wedding.firstName} & {wedding.secondName}</span>
++      </Link>
++      <nav className="hidden items-center gap-5 lg:flex" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded text-xs text-white/85 hover:text-white">{s.label}</Link>)}</nav>
++      <details className="relative lg:hidden"><summary className="focus-ring cursor-pointer list-none rounded-full border border-white/35 px-4 py-2.5 text-xs font-bold uppercase">Menu</summary>
++        <nav className="absolute right-0 mt-3 w-64 rounded-2xl bg-[#211a16] p-3 shadow-2xl" aria-label="Navegação mobile">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring block rounded-xl px-3 py-3 text-sm hover:bg-white/10">{s.label}</Link>)}</nav>
++      </details>
++    </div>
++  </header>;
+ }
+diff --git a/src/services/wedding/appearance.ts b/src/services/wedding/appearance.ts
+new file mode 100644
+index 0000000..dcb5eb5
+--- /dev/null
++++ b/src/services/wedding/appearance.ts
+@@ -0,0 +1,60 @@
++import type { CSSProperties } from "react";
++import { createSupabaseServerClient } from "@/lib/supabase/server";
++
++export const sections = [
++  { key: "historia", title: "Nossa história", href: "/historia" },
++  { key: "fotos", title: "Galeria de fotos", href: "/fotos" },
++  { key: "casamento", title: "O casamento", href: "/casamento" },
++  { key: "informacoes", title: "Informações", href: "/informacoes" },
++  { key: "padrinhos", title: "Padrinhos", href: "/padrinhos" },
++  { key: "presentes", title: "Presentes", href: "/presentes" },
++  { key: "rsvp", title: "Confirmar presença", href: "/rsvp" },
++  { key: "recados", title: "Recados", href: "/recados" },
++] as const;
++export type SectionKey = typeof sections[number]["key"];
++export const defaultColors = {
++  background_color: "#f8f4ed", surface_color: "#fffdf9", foreground_color: "#261f1a",
++  brand_color: "#65704d", accent_color: "#a87655",
++};
++export type ColorKey = keyof typeof defaultColors;
++export type Appearance = { colors: typeof defaultColors; visible: Record<SectionKey, boolean> };
++export const defaultVisibility = (): Record<SectionKey, boolean> =>
++  Object.fromEntries(sections.map(s=>[s.key,true])) as Record<SectionKey,boolean>;
++
++export async function getAppearance(weddingId?: string): Promise<Appearance> {
++  const result: Appearance = {colors:{...defaultColors},visible:defaultVisibility()};
++  const db=await createSupabaseServerClient();
++  if(!db)return result;
++  let id=weddingId;
++  if(!id){
++    const {data}=await db.from("weddings").select("id").eq("is_published",true)
++      .order("created_at").limit(1).maybeSingle();
++    id=data?.id;
++  }
++  if(!id)return result;
++  const [theme,flags]=await Promise.all([
++    db.from("wedding_appearance").select("background_color,surface_color,foreground_color,brand_color,accent_color").eq("wedding_id",id).maybeSingle(),
++    db.from("site_sections").select("key,is_enabled").eq("wedding_id",id),
++  ]);
++  if(theme.data){
++    for(const key of Object.keys(defaultColors) as ColorKey[]){
++      const value=theme.data[key];
++      if(typeof value==="string" && /^#[0-9a-fA-F]{6}$/.test(value))result.colors[key]=value;
++    }
++  }
++  for(const row of flags.data??[]){
++    if(row.key in result.visible) result.visible[row.key as SectionKey]=row.is_enabled;
++  }
++  return result;
++}
++
++export function appearanceStyle(colors: Appearance["colors"]): CSSProperties {
++  return {
++    "--background":colors.background_color,
++    "--surface":colors.surface_color,
++    "--foreground":colors.foreground_color,
++    "--brand":colors.brand_color,
++    "--brand-strong":colors.brand_color,
++    "--accent":colors.accent_color,
++  } as CSSProperties;
++}
+diff --git a/supabase/migrations/202610130005_appearance.sql b/supabase/migrations/202610130005_appearance.sql
+new file mode 100644
+index 0000000..5fdff96
+--- /dev/null
++++ b/supabase/migrations/202610130005_appearance.sql
+@@ -0,0 +1,25 @@
++-- Theme tokens and visibility controls, kept per wedding.
++create table if not exists public.wedding_appearance (
++  wedding_id uuid primary key references public.weddings(id) on delete cascade,
++  background_color text not null default '#f8f4ed' check (background_color ~ '^#[0-9a-fA-F]{6}$'),
++  surface_color text not null default '#fffdf9' check (surface_color ~ '^#[0-9a-fA-F]{6}$'),
++  foreground_color text not null default '#261f1a' check (foreground_color ~ '^#[0-9a-fA-F]{6}$'),
++  brand_color text not null default '#65704d' check (brand_color ~ '^#[0-9a-fA-F]{6}$'),
++  accent_color text not null default '#a87655' check (accent_color ~ '^#[0-9a-fA-F]{6}$'),
++  updated_at timestamptz not null default now()
++);
++alter table public.wedding_appearance enable row level security;
++create policy "public reads published appearance" on public.wedding_appearance
++  for select to anon, authenticated using (
++    exists(select 1 from public.weddings where id=wedding_id and is_published=true));
++create policy "admins manage appearance" on public.wedding_appearance
++  for all to authenticated using(public.is_wedding_admin(wedding_id))
++  with check(public.is_wedding_admin(wedding_id));
++create trigger appearance_updated_at before update on public.wedding_appearance
++  for each row execute function public.set_updated_at();
++-- A disabled section must remain visible to the page renderer so it can be hidden.
++-- These keys are not private information; this policy is scoped to published weddings.
++drop policy if exists "public reads enabled sections" on public.site_sections;
++create policy "public reads section settings" on public.site_sections
++  for select to anon, authenticated using (
++    exists(select 1 from public.weddings where id=wedding_id and is_published=true));
