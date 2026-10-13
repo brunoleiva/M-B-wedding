@@ -14,6 +14,29 @@ export function MobileNavigation({ navigation }: { navigation: NavigationItem[] 
     if (detailsRef.current) detailsRef.current.open = false;
   }, [pathname]);
 
+  useEffect(() => {
+    function handleOutsidePointer(event: PointerEvent) {
+      const menu = detailsRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && detailsRef.current?.open) {
+        detailsRef.current.open = false;
+        detailsRef.current.querySelector("summary")?.focus();
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsidePointer);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePointer);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   function closeMenu() {
     if (detailsRef.current) detailsRef.current.open = false;
   }
