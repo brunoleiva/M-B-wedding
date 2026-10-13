@@ -51,18 +51,21 @@ export async function getDashboardStats(weddingId: string): Promise<DashboardSta
     await Promise.all([
       supabase
         .from("guests")
-        .select("id", { count: "exact", head: true })
+        .select("id, guest_groups!inner(id)", { count: "exact", head: true })
+        .is("guest_groups.deleted_at", null)
         .eq("wedding_id", weddingId)
         .is("deleted_at", null),
       supabase
         .from("guests")
-        .select("id", { count: "exact", head: true })
+        .select("id, guest_groups!inner(id)", { count: "exact", head: true })
+        .is("guest_groups.deleted_at", null)
         .eq("wedding_id", weddingId)
         .eq("rsvp_status", "attending")
         .is("deleted_at", null),
       supabase
         .from("guests")
-        .select("id", { count: "exact", head: true })
+        .select("id, guest_groups!inner(id)", { count: "exact", head: true })
+        .is("guest_groups.deleted_at", null)
         .eq("wedding_id", weddingId)
         .eq("rsvp_status", "pending")
         .is("deleted_at", null),
