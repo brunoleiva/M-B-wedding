@@ -1,0 +1,306 @@
+diff --git a/src/app/(public)/casamento/page.tsx b/src/app/(public)/casamento/page.tsx
+index b56f15b..b3180df 100644
+--- a/src/app/(public)/casamento/page.tsx
++++ b/src/app/(public)/casamento/page.tsx
+@@ -9,7 +9,7 @@ export const metadata = { title: "O casamento" };
+ export default async function WeddingPage() {
+   if(!(await getAppearance()).visible.casamento) notFound();
+   const {venues, schedule, timezone} = await getPublishedEventDetails();
+-  return <section className="section-space pt-32"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="O casamento" title="Tudo o que você precisa saber" description="Os detalhes para celebrarmos juntos." />
++  return <section className="section-space public-inner-page"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="O casamento" title="Tudo o que você precisa saber" description="Os detalhes para celebrarmos juntos." />
+     <div className="mt-12">{venues.length || schedule.length ? <WeddingDetails venues={venues} schedule={schedule} timezone={timezone}/> : <div className="card-soft p-10 text-center text-muted">Em breve compartilharemos os detalhes da cerimônia e da festa.</div>}</div>
+   </div></section>;
+ }
+diff --git a/src/app/(public)/fotos/page.tsx b/src/app/(public)/fotos/page.tsx
+index 941ac62..2197ebe 100644
+--- a/src/app/(public)/fotos/page.tsx
++++ b/src/app/(public)/fotos/page.tsx
+@@ -5,4 +5,4 @@ import { PhotoGallery } from "@/components/public/photo-gallery";
+ import { getPublicContent } from "@/services/wedding/content";
+ export const metadata = {title:"Galeria de fotos"};
+ export default async function PhotosPage(){
+- if(!(await getAppearance()).visible.fotos) notFound();const {gallery}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos" description="Um pouquinho da nossa história em imagens."/><div className="mt-12">{gallery.length?<PhotoGallery photos={gallery}/>:<p className="text-center text-muted">Em breve, nossas fotos estarão aqui.</p>}</div></div></section>}
++ if(!(await getAppearance()).visible.fotos) notFound();const {gallery}=await getPublicContent();return <section className="section-space public-inner-page"><div className="page-shell"><SectionTitle eyebrow="Nossos momentos" title="Galeria de fotos" description="Um pouquinho da nossa história em imagens."/><div className="mt-12">{gallery.length?<PhotoGallery photos={gallery}/>:<p className="text-center text-muted">Em breve, nossas fotos estarão aqui.</p>}</div></div></section>}
+diff --git a/src/app/(public)/historia/page.tsx b/src/app/(public)/historia/page.tsx
+index 7e274a6..b67b3a5 100644
+--- a/src/app/(public)/historia/page.tsx
++++ b/src/app/(public)/historia/page.tsx
+@@ -5,4 +5,4 @@ import { SectionTitle } from "@/components/ui/section-title";
+ import { getPublicContent } from "@/services/wedding/content";
+ export const metadata={title:"Nossa história"};
+ export default async function StoryPage(){
+- if(!(await getAppearance()).visible.historia) notFound();const {story}=await getPublicContent();return <section className="section-space pt-32"><div className="page-shell max-w-4xl"><SectionTitle eyebrow="Nossa história" title="Antes do grande dia" description="Os momentos que nos trouxeram até aqui."/><StoryTimeline events={story}/></div></section>}
++ if(!(await getAppearance()).visible.historia) notFound();const {story}=await getPublicContent();return <section className="section-space public-inner-page"><div className="page-shell max-w-4xl"><SectionTitle eyebrow="Nossa história" title="Antes do grande dia" description="Os momentos que nos trouxeram até aqui."/><StoryTimeline events={story}/></div></section>}
+diff --git a/src/app/(public)/informacoes/page.tsx b/src/app/(public)/informacoes/page.tsx
+index d395064..ff6f9cd 100644
+--- a/src/app/(public)/informacoes/page.tsx
++++ b/src/app/(public)/informacoes/page.tsx
+@@ -8,7 +8,7 @@ export default async function InfoPage(){
+  const {info,faqs,hotels}=await getPublicGuestInformation();
+  const hasDress=Boolean(info?.dress_title||info?.dress_description||info?.colors_to_avoid);
+  const hasTransport=Boolean(info?.transport_text||info?.parking_text);
+- return <section className="section-space pt-32"><div className="page-shell max-w-5xl">
++ return <section className="section-space public-inner-page"><div className="page-shell max-w-5xl">
+   <SectionTitle eyebrow="Informações" title="Tudo para aproveitar o nosso grande dia" description="Orientações para convidados, atualizadas pelos noivos."/>
+   {!(hasDress||hasTransport||hotels.length||faqs.length)&&<p className="mt-10 text-center text-muted">Em breve compartilharemos mais informações sobre o casamento.</p>}
+   {(hasDress||hasTransport)&&<div className="mt-12 grid gap-5 md:grid-cols-2">
+diff --git a/src/app/(public)/padrinhos/page.tsx b/src/app/(public)/padrinhos/page.tsx
+index 7afdbef..e292a39 100644
+--- a/src/app/(public)/padrinhos/page.tsx
++++ b/src/app/(public)/padrinhos/page.tsx
+@@ -7,7 +7,7 @@ export const metadata={title:"Padrinhos e pessoas especiais"};
+ export default async function PeoplePage(){
+  if(!(await getAppearance()).visible.padrinhos) notFound();
+  const {people}=await getPublicGuestInformation();
+- return <section className="section-space pt-32"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="Pessoas especiais" title="Quem caminha ao nosso lado" description="Pessoas queridas que fazem parte da nossa história."/>
++ return <section className="section-space public-inner-page"><div className="page-shell max-w-5xl"><SectionTitle eyebrow="Pessoas especiais" title="Quem caminha ao nosso lado" description="Pessoas queridas que fazem parte da nossa história."/>
+  {people.length===0?<p className="mt-12 text-center text-muted">Em breve apresentaremos nossas pessoas especiais.</p>:<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{people.map(p=><article key={p.id} className="card-soft overflow-hidden">{p.image_url&&<div className="relative aspect-[4/5]"><Image src={p.image_url} alt={`Foto de ${p.name}`} fill unoptimized className="object-cover" sizes="(max-width: 640px) 100vw, 33vw"/></div>}<div className="p-6"><p className="text-xs uppercase tracking-widest text-muted">{p.category} · {p.role_label}</p><h2 className="font-editorial mt-2 text-3xl">{p.name}</h2>{p.description&&<p className="mt-3 whitespace-pre-line text-muted">{p.description}</p>}</div></article>)}</div>}
+  </div></section>;
+ }
+diff --git a/src/app/(public)/presentes/page.tsx b/src/app/(public)/presentes/page.tsx
+index 39008be..dcd7e6c 100644
+--- a/src/app/(public)/presentes/page.tsx
++++ b/src/app/(public)/presentes/page.tsx
+@@ -14,7 +14,7 @@ export const metadata = { title: "Presentes" };
+ export default async function GiftsPage() {
+   if (!(await getAppearance()).visible.presentes) notFound();
+   return (
+-    <section className="section-space pt-32">
++    <section className="section-space public-inner-page">
+       <div className="page-shell">
+         <SectionTitle eyebrow="Lista de presentes" title="Experiências para a nossa próxima aventura" description="Nesta fundação os cards já estão prontos; o catálogo será conectado ao Supabase na fase de presentes." />
+         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+diff --git a/src/app/(public)/recados/page.tsx b/src/app/(public)/recados/page.tsx
+index 4732e85..085e18d 100644
+--- a/src/app/(public)/recados/page.tsx
++++ b/src/app/(public)/recados/page.tsx
+@@ -7,7 +7,7 @@ export const metadata = { title: "Recados" };
+ export default async function MessagesPage() {
+   if (!(await getAppearance()).visible.recados) notFound();
+   return (
+-    <section className="section-space pt-32">
++    <section className="section-space public-inner-page">
+       <div className="page-shell max-w-4xl">
+         <SectionTitle eyebrow="Recados" title="Deixe um carinho para nós" description="A moderação já está prevista no banco; o formulário público entra na fase de interações." />
+         <div className="card-soft mt-10 p-8 text-center">
+diff --git a/src/app/(public)/rsvp/page.tsx b/src/app/(public)/rsvp/page.tsx
+index d2123c0..766fc3f 100644
+--- a/src/app/(public)/rsvp/page.tsx
++++ b/src/app/(public)/rsvp/page.tsx
+@@ -7,7 +7,7 @@ export const metadata = { title: "Confirmar presença" };
+ export default async function RsvpPage() {
+   if (!(await getAppearance()).visible.rsvp) notFound();
+   return (
+-    <section className="section-space pt-32">
++    <section className="section-space public-inner-page">
+       <div className="page-shell max-w-3xl">
+         <SectionTitle eyebrow="RSVP" title="Confirme sua presença" description="O fluxo definitivo será por convite/grupo familiar. A estrutura de banco já está preparada sem expor a lista de convidados." />
+         <div className="card-soft mt-10 p-7 sm:p-10">
+diff --git a/src/app/admin/(protected)/aparencia/actions.ts b/src/app/admin/(protected)/aparencia/actions.ts
+index d9b3a06..ad7134a 100644
+--- a/src/app/admin/(protected)/aparencia/actions.ts
++++ b/src/app/admin/(protected)/aparencia/actions.ts
+@@ -11,29 +11,32 @@ export async function saveAppearance(form:FormData){
+  const db=await createSupabaseServerClient();
+  if(!db)redirect("/admin/aparencia?error=database");
+  const intent = form.get("intent");
+- if (!["save", "set_default", "restore"].includes(String(intent))) redirect("/admin/aparencia?error=action");
+- const colors={...defaultColors};
+- for(const key of Object.keys(colors) as ColorKey[]){
+-   const value=form.get(key);
+-   if(typeof value!=="string" || !/^#[0-9a-fA-F]{6}$/.test(value))redirect("/admin/aparencia?error=colors");
+-   colors[key]=value;
+- }
+- const enabled=form.getAll("visible").filter((x):x is string=>typeof x==="string");
+- if(enabled.some(x=>!sections.some(s=>s.key===x)))redirect("/admin/aparencia?error=sections");
+- const savedDefaults = intent === "restore" ? await getSavedDefaultColors(ctx.weddingId) : null;
+- const payload: Record<string,string> = {};
+- for (const key of Object.keys(colors) as ColorKey[]) {
+-   if (intent === "set_default") payload[defaultColumn(key)] = colors[key];
+-   else payload[key] = savedDefaults ? savedDefaults[key] : colors[key];
+- }
+- const {error:themeError}=await db.from("wedding_appearance").upsert({wedding_id:ctx.weddingId,...payload},{onConflict:"wedding_id"});
+- if(themeError)redirect("/admin/aparencia?error=database");
+- if (intent === "save") {
+-   const {error:sectionError}=await db.from("site_sections").upsert(
++ if (!["save_colors", "save_sections", "set_default", "restore"].includes(String(intent))) redirect("/admin/aparencia?error=action");
++ if (intent === "save_sections") {
++   const enabled = form.getAll("visible").filter((x): x is string => typeof x === "string");
++   if (enabled.some(x => !sections.some(s => s.key === x))) redirect("/admin/aparencia?error=sections");
++   const {error} = await db.from("site_sections").upsert(
+      sections.map((s,index)=>({wedding_id:ctx.weddingId,key:s.key,label:s.title,is_enabled:enabled.includes(s.key),sort_order:index})),
+      {onConflict:"wedding_id,key"}
+    );
+-   if(sectionError)redirect("/admin/aparencia?error=sections_database");
++   if (error) redirect("/admin/aparencia?error=sections_database");
++ } else {
++   const colors = {...defaultColors};
++   if (intent !== "restore") {
++     for (const key of Object.keys(colors) as ColorKey[]) {
++       const value = form.get(key);
++       if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value)) redirect("/admin/aparencia?error=colors");
++       colors[key] = value;
++     }
++   }
++   const savedDefaults = intent === "restore" ? await getSavedDefaultColors(ctx.weddingId) : null;
++   const payload: Record<string,string> = {};
++   for (const key of Object.keys(colors) as ColorKey[]) {
++     if (intent === "set_default") payload[defaultColumn(key)] = colors[key];
++     else payload[key] = savedDefaults ? savedDefaults[key] : colors[key];
++   }
++   const {error} = await db.from("wedding_appearance").upsert({wedding_id:ctx.weddingId,...payload},{onConflict:"wedding_id"});
++   if (error) redirect("/admin/aparencia?error=database");
+  }
+  revalidatePath("/", "layout");
+  redirect(`/admin/aparencia?saved=${intent}`);
+diff --git a/src/app/admin/(protected)/aparencia/page.tsx b/src/app/admin/(protected)/aparencia/page.tsx
+index 3f21782..cc85e9d 100644
+--- a/src/app/admin/(protected)/aparencia/page.tsx
++++ b/src/app/admin/(protected)/aparencia/page.tsx
+@@ -10,22 +10,29 @@ export default async function AppearancePage({searchParams}:{searchParams:Promis
+  const params=await searchParams;
+  return <div className="mx-auto max-w-4xl space-y-8">
+    <header><p className="eyebrow">Personalização</p><h1 className="font-editorial mt-3 text-4xl">Aparência e seções</h1><p className="mt-2 text-muted">Personalize as cores e escolha o que os convidados podem acessar.</p></header>
+-   {params.saved&&<p role="status" className="rounded-xl border border-brand p-4">Alterações salvas. O site público já utiliza essas configurações.</p>}
++   {params.saved&&<p role="status" className="rounded-xl border border-brand p-4">{params.saved === "set_default" ? "Cor padrão alterada. As cores em uso foram preservadas." : params.saved === "restore" ? "Voltou ao padrão. A paleta padrão foi aplicada ao site." : params.saved === "save_colors" ? "Cores salvas. A paleta padrão foi preservada." : params.saved === "save_sections" ? "Seções salvas." : "Alterações salvas."}</p>}
+    {params.error&&<p role="alert" className="rounded-xl border border-danger p-4 text-danger">Não foi possível salvar ({params.error}). Verifique os campos e tente novamente.</p>}
+-   <form action={saveAppearance} className="space-y-8">
++   <div className="space-y-8">
++   <form action={saveAppearance} className="space-y-6">
+      <section className="card-soft space-y-6 p-6"><h2 className="font-editorial text-3xl">Cores do site</h2><p className="text-sm text-muted">O painel administrativo mantém sua aparência para facilitar a leitura.</p>
+        <p className="text-sm text-muted">A paleta padrão é independente das cores atualmente aplicadas. Definir como padrão não muda o visual do site.</p>
+        <div className="grid gap-4 sm:grid-cols-2">{(Object.entries(labels) as [keyof typeof labels,string][]).map(([key,label])=><label key={key} className="flex items-center gap-4 rounded-xl border border-line p-3"><input aria-label={label} name={key} type="color" defaultValue={appearance.colors[key]} className="h-12 w-16 cursor-pointer rounded border border-line"/><span className="font-medium">{label}</span></label>)}</div>
+      <div className="rounded-xl border border-line p-4 text-sm"><strong>Paleta padrão salva:</strong><div className="mt-3 flex flex-wrap gap-2">{Object.entries(savedDefault).map(([key,value])=><span key={key} title={`${key}: ${value}`} style={{backgroundColor:value}} className="size-8 rounded-full border border-line" />)}</div></div>
++       <div className="flex flex-wrap gap-3 border-t border-line pt-5">
++         <button type="submit" name="intent" value="save_colors" className="focus-ring min-h-12 rounded-full bg-brand px-8 font-semibold text-white">Salvar cores</button>
++         <button type="submit" name="intent" value="set_default" className="focus-ring min-h-12 rounded-full border border-brand px-6 font-semibold">Definir como padrão</button>
++         <button type="submit" name="intent" value="restore" className="focus-ring min-h-12 rounded-full border border-line px-6 font-semibold">Voltar ao padrão</button>
++       </div>
+      </section>
++   </form>
++   <form action={saveAppearance} className="space-y-5">
+      <section className="card-soft space-y-5 p-6"><h2 className="font-editorial text-3xl">Seções visíveis</h2><p className="text-sm text-muted">Se uma seção for desativada, ela desaparece do menu, da Home e de sua página pública. Os dados cadastrados são preservados.</p>
+        <div className="grid gap-3 sm:grid-cols-2">{sections.map(s=><label key={s.key} className="flex items-center gap-3 rounded-xl border border-line p-4"><input type="checkbox" name="visible" value={s.key} defaultChecked={appearance.visible[s.key]} className="size-5 accent-brand"/><span>{s.title}</span></label>)}</div>
+      </section>
+      <div className="flex flex-wrap gap-3">
+-       <button type="submit" name="intent" value="save" className="focus-ring min-h-12 rounded-full bg-brand px-8 font-semibold text-white">Salvar personalização</button>
+-       <button type="submit" name="intent" value="set_default" className="focus-ring min-h-12 rounded-full border border-brand px-6 font-semibold">Definir como padrão</button>
+-       <button type="submit" name="intent" value="restore" className="focus-ring min-h-12 rounded-full border border-line px-6 font-semibold">Voltar ao padrão</button>
++       <button type="submit" name="intent" value="save_sections" className="focus-ring min-h-12 rounded-full bg-brand px-8 font-semibold text-white">Salvar seções</button>
+      </div>
+    </form>
++   </div>
+  </div>;
+ }
+diff --git a/src/app/globals.css b/src/app/globals.css
+index 5db2289..0705146 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -65,6 +65,11 @@ body {
+   padding-block: clamp(4.5rem, 10vw, 8rem);
+ }
+ 
++/* Inner pages need clearance for the fixed 4.5rem public header. */
++.public-inner-page {
++  padding-top: clamp(9rem, 13vw, 11rem);
++}
++
+ .eyebrow {
+   color: var(--brand-strong);
+   font-size: 0.72rem;
+diff --git a/src/components/admin/save-success-modal.tsx b/src/components/admin/save-success-modal.tsx
+index 1bc0cb5..569c123 100644
+--- a/src/components/admin/save-success-modal.tsx
++++ b/src/components/admin/save-success-modal.tsx
+@@ -10,7 +10,17 @@ export function SaveSuccessModal() {
+   const success = params.get("saved") ?? params.get("removed");
+   const [open, setOpen] = useState(false);
+   const closeButton = useRef<HTMLButtonElement>(null);
+-  const title = params.has("removed") ? "Exclusão concluída" : "Alterações salvas!";
++  const messages: Record<string, {title: string; description: string}> = {
++    save_colors: {title: "Cores salvas", description: "As cores em uso foram atualizadas. A paleta padrão não foi alterada."},
++    set_default: {title: "Cor padrão alterada", description: "A paleta foi definida como padrão sem mudar as cores atualmente aplicadas."},
++    restore: {title: "Voltou ao padrão", description: "As cores padrão foram aplicadas ao site."},
++    save_sections: {title: "Seções salvas", description: "A visibilidade das seções foi atualizada."},
++    venue: {title: "Informações salvas", description: "Os dados da cerimônia e recepção foram atualizados."},
++    schedule: {title: "Cronograma salvo", description: "Os horários do casamento foram atualizados."},
++  };
++  const message = params.has("removed")
++    ? {title: "Exclusão concluída", description: "O registro foi removido com sucesso."}
++    : messages[success ?? ""] ?? {title: "Informações salvas", description: "Suas alterações foram registradas com sucesso."};
+ 
+   useEffect(() => {
+     setOpen(Boolean(success));
+@@ -32,8 +42,8 @@ export function SaveSuccessModal() {
+     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
+       <div role="dialog" aria-modal="true" aria-labelledby="save-success-title" aria-describedby="save-success-description" className="w-full max-w-sm rounded-3xl bg-white p-8 text-center text-[#261f1a] shadow-2xl">
+         <div aria-hidden="true" className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-800">✓</div>
+-        <h2 id="save-success-title" className="font-editorial text-3xl">{title}</h2>
+-        <p id="save-success-description" className="mt-3 text-sm text-[#5f5d58]">{params.has("removed") ? "O registro foi removido com sucesso." : "Suas alterações foram confirmadas e estão registradas."}</p>
++        <h2 id="save-success-title" className="font-editorial text-3xl">{message.title}</h2>
++        <p id="save-success-description" className="mt-3 text-sm text-[#5f5d58]">{message.description}</p>
+         <button ref={closeButton} type="button" onClick={() => setOpen(false)} className="focus-ring mt-7 min-h-12 w-full rounded-full bg-[#65704d] px-6 font-semibold text-white">Entendi</button>
+       </div>
+     </div>
+diff --git a/src/components/public/mobile-navigation.tsx b/src/components/public/mobile-navigation.tsx
+new file mode 100644
+index 0000000..32f85fb
+--- /dev/null
++++ b/src/components/public/mobile-navigation.tsx
+@@ -0,0 +1,35 @@
++"use client";
++
++import Link from "next/link";
++import { usePathname } from "next/navigation";
++import { useEffect, useRef } from "react";
++
++type NavigationItem = { label: string; href: string };
++
++export function MobileNavigation({ navigation }: { navigation: NavigationItem[] }) {
++  const detailsRef = useRef<HTMLDetailsElement>(null);
++  const pathname = usePathname();
++
++  useEffect(() => {
++    if (detailsRef.current) detailsRef.current.open = false;
++  }, [pathname]);
++
++  function closeMenu() {
++    if (detailsRef.current) detailsRef.current.open = false;
++  }
++
++  return (
++    <details ref={detailsRef} className="relative lg:hidden">
++      <summary className="focus-ring cursor-pointer list-none rounded-full border border-white/35 px-4 py-2.5 text-xs font-bold uppercase">
++        Menu
++      </summary>
++      <nav className="absolute right-0 mt-3 w-64 rounded-2xl bg-[#211a16] p-3 shadow-2xl" aria-label="Navegação mobile">
++        {navigation.map((item) => (
++          <Link key={item.href} href={item.href} onClick={closeMenu} className="focus-ring block rounded-xl px-3 py-3 text-sm hover:bg-white/10">
++            {item.label}
++          </Link>
++        ))}
++      </nav>
++    </details>
++  );
++}
+diff --git a/src/components/public/public-header.tsx b/src/components/public/public-header.tsx
+index cd43b1d..853c4f5 100644
+--- a/src/components/public/public-header.tsx
++++ b/src/components/public/public-header.tsx
+@@ -1,4 +1,5 @@
+ import Link from "next/link";
++import { MobileNavigation } from "@/components/public/mobile-navigation";
+ import type { PublicWedding } from "@/services/wedding/public";
+ import { sections, type Appearance } from "@/services/wedding/appearance";
+ 
+@@ -11,9 +12,7 @@ export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; vis
+         <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">{wedding.firstName} & {wedding.secondName}</span>
+       </Link>
+       <nav className="hidden items-center gap-5 lg:flex" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded text-xs text-white/85 hover:text-white">{s.label}</Link>)}</nav>
+-      <details className="relative lg:hidden"><summary className="focus-ring cursor-pointer list-none rounded-full border border-white/35 px-4 py-2.5 text-xs font-bold uppercase">Menu</summary>
+-        <nav className="absolute right-0 mt-3 w-64 rounded-2xl bg-[#211a16] p-3 shadow-2xl" aria-label="Navegação mobile">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring block rounded-xl px-3 py-3 text-sm hover:bg-white/10">{s.label}</Link>)}</nav>
+-      </details>
++      <MobileNavigation navigation={navigation} />
+     </div>
+   </header>;
+ }

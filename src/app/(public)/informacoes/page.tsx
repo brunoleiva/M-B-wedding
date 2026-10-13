@@ -8,7 +8,7 @@ export default async function InfoPage(){
  const {info,faqs,hotels}=await getPublicGuestInformation();
  const hasDress=Boolean(info?.dress_title||info?.dress_description||info?.colors_to_avoid);
  const hasTransport=Boolean(info?.transport_text||info?.parking_text);
- return <section className="section-space pt-32"><div className="page-shell max-w-5xl">
+ return <section className="section-space public-inner-page"><div className="page-shell max-w-5xl">
   <SectionTitle eyebrow="Informações" title="Tudo para aproveitar o nosso grande dia" description="Orientações para convidados, atualizadas pelos noivos."/>
   {!(hasDress||hasTransport||hotels.length||faqs.length)&&<p className="mt-10 text-center text-muted">Em breve compartilharemos mais informações sobre o casamento.</p>}
   {(hasDress||hasTransport)&&<div className="mt-12 grid gap-5 md:grid-cols-2">

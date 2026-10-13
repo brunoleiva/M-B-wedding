@@ -14,7 +14,7 @@ export const metadata = { title: "Presentes" };
 export default async function GiftsPage() {
   if (!(await getAppearance()).visible.presentes) notFound();
   return (
-    <section className="section-space pt-32">
+    <section className="section-space public-inner-page">
       <div className="page-shell">
         <SectionTitle eyebrow="Lista de presentes" title="Experiências para a nossa próxima aventura" description="Nesta fundação os cards já estão prontos; o catálogo será conectado ao Supabase na fase de presentes." />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

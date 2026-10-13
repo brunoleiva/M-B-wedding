@@ -7,7 +7,7 @@ export const metadata = { title: "Confirmar presença" };
 export default async function RsvpPage() {
   if (!(await getAppearance()).visible.rsvp) notFound();
   return (
-    <section className="section-space pt-32">
+    <section className="section-space public-inner-page">
       <div className="page-shell max-w-3xl">
         <SectionTitle eyebrow="RSVP" title="Confirme sua presença" description="O fluxo definitivo será por convite/grupo familiar. A estrutura de banco já está preparada sem expor a lista de convidados." />
         <div className="card-soft mt-10 p-7 sm:p-10">

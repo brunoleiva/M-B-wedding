@@ -10,7 +10,17 @@ export function SaveSuccessModal() {
   const success = params.get("saved") ?? params.get("removed");
   const [open, setOpen] = useState(false);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const title = params.has("removed") ? "Exclusão concluída" : "Alterações salvas!";
+  const messages: Record<string, {title: string; description: string}> = {
+    save_colors: {title: "Cores salvas", description: "As cores em uso foram atualizadas. A paleta padrão não foi alterada."},
+    set_default: {title: "Cor padrão alterada", description: "A paleta foi definida como padrão sem mudar as cores atualmente aplicadas."},
+    restore: {title: "Voltou ao padrão", description: "As cores padrão foram aplicadas ao site."},
+    save_sections: {title: "Seções salvas", description: "A visibilidade das seções foi atualizada."},
+    venue: {title: "Informações salvas", description: "Os dados da cerimônia e recepção foram atualizados."},
+    schedule: {title: "Cronograma salvo", description: "Os horários do casamento foram atualizados."},
+  };
+  const message = params.has("removed")
+    ? {title: "Exclusão concluída", description: "O registro foi removido com sucesso."}
+    : messages[success ?? ""] ?? {title: "Informações salvas", description: "Suas alterações foram registradas com sucesso."};
 
   useEffect(() => {
     setOpen(Boolean(success));
@@ -32,8 +42,8 @@ export function SaveSuccessModal() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
       <div role="dialog" aria-modal="true" aria-labelledby="save-success-title" aria-describedby="save-success-description" className="w-full max-w-sm rounded-3xl bg-white p-8 text-center text-[#261f1a] shadow-2xl">
         <div aria-hidden="true" className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-800">✓</div>
-        <h2 id="save-success-title" className="font-editorial text-3xl">{title}</h2>
-        <p id="save-success-description" className="mt-3 text-sm text-[#5f5d58]">{params.has("removed") ? "O registro foi removido com sucesso." : "Suas alterações foram confirmadas e estão registradas."}</p>
+        <h2 id="save-success-title" className="font-editorial text-3xl">{message.title}</h2>
+        <p id="save-success-description" className="mt-3 text-sm text-[#5f5d58]">{message.description}</p>
         <button ref={closeButton} type="button" onClick={() => setOpen(false)} className="focus-ring mt-7 min-h-12 w-full rounded-full bg-[#65704d] px-6 font-semibold text-white">Entendi</button>
       </div>
     </div>

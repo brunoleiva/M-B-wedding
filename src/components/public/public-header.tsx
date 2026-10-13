@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MobileNavigation } from "@/components/public/mobile-navigation";
 import type { PublicWedding } from "@/services/wedding/public";
 import { sections, type Appearance } from "@/services/wedding/appearance";
 
@@ -11,9 +12,7 @@ export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; vis
         <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">{wedding.firstName} & {wedding.secondName}</span>
       </Link>
       <nav className="hidden items-center gap-5 lg:flex" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded text-xs text-white/85 hover:text-white">{s.label}</Link>)}</nav>
-      <details className="relative lg:hidden"><summary className="focus-ring cursor-pointer list-none rounded-full border border-white/35 px-4 py-2.5 text-xs font-bold uppercase">Menu</summary>
-        <nav className="absolute right-0 mt-3 w-64 rounded-2xl bg-[#211a16] p-3 shadow-2xl" aria-label="Navegação mobile">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring block rounded-xl px-3 py-3 text-sm hover:bg-white/10">{s.label}</Link>)}</nav>
-      </details>
+      <MobileNavigation navigation={navigation} />
     </div>
   </header>;
 }

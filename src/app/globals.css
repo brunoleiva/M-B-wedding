@@ -65,6 +65,11 @@ body {
   padding-block: clamp(4.5rem, 10vw, 8rem);
 }
 
+/* Inner pages need clearance for the fixed 4.5rem public header. */
+.public-inner-page {
+  padding-top: clamp(9rem, 13vw, 11rem);
+}
+
 .eyebrow {
   color: var(--brand-strong);
   font-size: 0.72rem;
