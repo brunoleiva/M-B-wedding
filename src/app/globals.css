@@ -131,3 +131,16 @@ a[href]:focus-visible, button:focus-visible, summary:focus-visible, input[type="
 .btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);}
 .btn-primary:active{transform:translateY(0);}
 .btn-primary:focus-visible{outline:3px solid var(--brand);outline-offset:3px;}
+
+
+/* Reusable admin action vocabulary: one size, predictable contrast, focus and hover. */
+.admin-btn { display:inline-flex;align-items:center;justify-content:center;gap:.55rem;min-height:2.875rem;padding:.7rem 1.25rem;border-radius:9999px;border:1px solid transparent;font-size:.9375rem;line-height:1.25;font-weight:650;text-align:center;text-decoration:none;white-space:normal;cursor:pointer;transition:background-color .18s,color .18s,border-color .18s,box-shadow .18s,transform .18s; }
+.admin-btn--primary {background:var(--brand);color:#fff;border-color:var(--brand);}
+.admin-btn--secondary {background:var(--surface,#fff);color:var(--foreground,#261f1a);border-color:var(--line,#d6d0c8);box-shadow:0 2px 5px rgba(0,0,0,.045);}
+.admin-btn--danger {background:#fff5f4;color:#991b1b;border-color:#fecaca;}
+.admin-btn--back {background:var(--surface,#fff);color:var(--brand);border-color:var(--line,#d6d0c8);box-shadow:0 2px 5px rgba(0,0,0,.045);}
+@media(hover:hover){.admin-btn:hover{transform:translateY(-2px);box-shadow:0 7px 18px rgba(0,0,0,.13);text-decoration:none;}.admin-btn--primary:hover{filter:brightness(1.12)}.admin-btn--secondary:hover,.admin-btn--back:hover{background:color-mix(in srgb,var(--brand) 10%,white);border-color:var(--brand)}.admin-btn--danger:hover{background:#fee2e2;border-color:#f87171}}
+.admin-btn:active{transform:translateY(0) scale(.985)}
+.admin-btn:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+.admin-btn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+@media(prefers-reduced-motion:reduce){.admin-btn{transition:none}}

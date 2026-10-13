@@ -33,7 +33,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
     <label className={label}>Foto<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" className={input}/></label>
     <label className="flex items-center gap-2"><input name="is_published" type="checkbox" defaultChecked={person?.is_published??false}/> Publicar</label>
     <button className={button}>{person?"Salvar pessoa":"Adicionar pessoa"}</button>
-   </form>{person&&<form action={deleteInfoItem} className="mt-3"><input name="table" value="special_people" type="hidden"/><input name="id" value={person.id} type="hidden"/><button className="text-sm text-red-700 underline">Excluir pessoa</button></form>}
+   </form>{person&&<form action={deleteInfoItem} className="mt-3"><input name="table" value="special_people" type="hidden"/><input name="id" value={person.id} type="hidden"/><button className="admin-btn admin-btn--danger">Excluir pessoa</button></form>}
   </article>)}</section>
   <section className="space-y-4"><h2 className="font-editorial text-3xl">Perguntas frequentes</h2>
   {[...data.faqs,null].map(faq=><article className="card-soft p-6" key={faq?.id??"new"}><form action={saveFaq} className="grid gap-4">
@@ -42,7 +42,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
    <label className={label}>Resposta *<textarea name="answer" required rows={3} className={input} defaultValue={faq?.answer??""}/></label>
    <div className="flex flex-wrap items-center gap-5"><label className={label}>Ordem<input type="number" min="0" name="sort_order" className={input} defaultValue={faq?.sort_order??0}/></label><label className="flex items-center gap-2"><input name="is_active" type="checkbox" defaultChecked={faq?.is_active??false}/> Publicar</label></div>
    <button className={button}>{faq?"Salvar pergunta":"Adicionar pergunta"}</button>
-  </form>{faq&&<form action={deleteInfoItem} className="mt-3"><input type="hidden" name="table" value="faqs"/><input type="hidden" name="id" value={faq.id}/><button className="text-sm text-red-700 underline">Excluir pergunta</button></form>}</article>)}</section>
+  </form>{faq&&<form action={deleteInfoItem} className="mt-3"><input type="hidden" name="table" value="faqs"/><input type="hidden" name="id" value={faq.id}/><button className="admin-btn admin-btn--danger">Excluir pergunta</button></form>}</article>)}</section>
   <section className="space-y-4"><h2 className="font-editorial text-3xl">Hospedagem</h2>
   {[...data.hotels,null].map(hotel=><article className="card-soft p-6" key={hotel?.id??"new"}><form action={saveHotel} className="grid gap-4 sm:grid-cols-2">
    {hotel&&<input type="hidden" name="id" value={hotel.id}/>}
@@ -53,6 +53,6 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
    <label className={label}>Ordem<input type="number" min="0" name="sort_order" className={input} defaultValue={hotel?.sort_order??0}/></label>
    <label className="flex items-center gap-2"><input type="checkbox" name="is_published" defaultChecked={hotel?.is_published??false}/> Publicar</label>
    <button className={button}>{hotel?"Salvar hotel":"Adicionar hotel"}</button>
-  </form>{hotel&&<form action={deleteInfoItem} className="mt-3"><input type="hidden" name="table" value="recommended_hotels"/><input type="hidden" name="id" value={hotel.id}/><button className="text-sm text-red-700 underline">Excluir hotel</button></form>}</article>)}</section>
+  </form>{hotel&&<form action={deleteInfoItem} className="mt-3"><input type="hidden" name="table" value="recommended_hotels"/><input type="hidden" name="id" value={hotel.id}/><button className="admin-btn admin-btn--danger">Excluir hotel</button></form>}</article>)}</section>
  </div>;
 }
