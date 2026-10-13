@@ -123,3 +123,11 @@ a[href]:focus-visible, button:focus-visible, summary:focus-visible, input[type="
     transition-duration: 0.01ms !important;
   }
 }
+
+.guest-input {display:block;width:100%;margin-top:0.4rem;border:1px solid var(--line, #ddd);border-radius:0.75rem;padding:0.85rem;background:#fff;font-size:1rem;color:#222;}
+.guest-input:focus-visible{outline:2px solid var(--brand,#6e7752);outline-offset:2px;}
+
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;background:var(--brand);color:#fff;padding:.8rem 1.4rem;font-weight:650;transition:filter .18s,transform .18s;cursor:pointer;}
+.btn-primary:hover{filter:brightness(1.12);transform:translateY(-1px);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary:focus-visible{outline:3px solid var(--brand);outline-offset:3px;}
