@@ -3,13 +3,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAdminContext } from "@/services/admin/dashboard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { weddingSettingsSchema } from "@/validation/wedding-settings";
+import { weddingSettingsSchema, weddingSettingsKeys } from "@/validation/wedding-settings";
 
 export async function saveWeddingSettings(form: FormData) {
   const context = await getAdminContext();
   if (!context) redirect("/admin/login?error=unauthorized");
   const parsed = weddingSettingsSchema.safeParse(Object.fromEntries(
-    ["firstName","secondName","city","date","time","timezone","heroMessage","venueName","venueAddress","venueDescription"].map(key => [key, form.get(key)])
+    weddingSettingsKeys.map(key => [key, form.get(key) ?? ""])
   ));
   if (!parsed.success) {
     // Expor apenas os nomes dos campos, nunca dados digitados pelo usuário.
@@ -51,7 +51,7 @@ export async function saveWeddingSettings(form: FormData) {
   }
   const { error } = await supabase.from("weddings").update({
     first_name: values.firstName, second_name: values.secondName, city: values.city,
-    event_at: eventAt, timezone: values.timezone, hero_subtitle: values.heroMessage,
+    event_at: eventAt, timezone: values.timezone, hero_subtitle: values.heroMessage || null,
     ...(heroImagePath ? { hero_image_path: heroImagePath } : {}),
   }).eq("id",context.weddingId);
   if (error) redirect("/admin/configuracoes?error=database");
