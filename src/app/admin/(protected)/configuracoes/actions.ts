@@ -11,7 +11,12 @@ export async function saveWeddingSettings(form: FormData) {
   const parsed = weddingSettingsSchema.safeParse(Object.fromEntries(
     ["firstName","secondName","city","date","time","timezone","heroMessage","venueName","venueAddress","venueDescription"].map(key => [key, form.get(key)])
   ));
-  if (!parsed.success) redirect("/admin/configuracoes?error=invalid_fields");
+  if (!parsed.success) {
+    // Expor apenas os nomes dos campos, nunca dados digitados pelo usuário.
+    const fields = [...new Set(parsed.error.issues.map(issue => String(issue.path[0] ?? "form")))];
+    const fieldNames = fields.join(",");
+    redirect(`/admin/configuracoes?error=invalid_fields&fields=${encodeURIComponent(fieldNames)}`);
+  }
   const values = parsed.data;
   // Construct the event instant from local wall time in the configured timezone.
   // Offset is computed using Intl, independent from the deployment server timezone.
