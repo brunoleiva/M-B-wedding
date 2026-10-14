@@ -31,6 +31,7 @@ export type GiftPayment = {
   id: string;
   gift_id: string | null;
   guest_name: string;
+  message: string | null;
   amount_cents: number;
   quantity: number;
   status: PaymentStatus;
