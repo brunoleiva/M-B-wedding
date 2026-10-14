@@ -14,7 +14,7 @@ export default async function GiftOrderPage({params}:{params:Promise<{token:stri
   const {data,error}=await db.rpc("read_gift_pix_order",{p_checkout_token:token});
   const payment=data?.[0];
   if(error||!payment)notFound();
-  const expired=payment.expires_at&&new Date(payment.expires_at).getTime()<=Date.now();
+  const expired = isPixReservationExpired(payment.expires_at);
   const code=payment.payment_status==="pending_confirmation"&&!expired
     ? createPixCode(payment.pix_key,payment.receiver_name,payment.receiver_city,payment.amount_cents):null;
   return <section className="public-inner-page section-space"><div className="page-shell mx-auto max-w-2xl space-y-6">
@@ -37,4 +37,9 @@ export default async function GiftOrderPage({params}:{params:Promise<{token:stri
 async function qrDataUrl(content:string) {
   const QRCode = await import("qrcode");
   return QRCode.toDataURL(content,{errorCorrectionLevel:"M",margin:2,width:260});
+}
+
+
+function isPixReservationExpired(expiresAt: string | null): boolean {
+  return Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
 }

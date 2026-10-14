@@ -9,7 +9,7 @@ export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; vis
     <div className="page-shell flex h-[5rem] items-center justify-between gap-3 xl:gap-5">
       <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">
         <span className="font-editorial flex size-13 shrink-0 items-center justify-center whitespace-nowrap rounded-full border-2 border-current/80 bg-white/10 px-1 text-[1rem] font-bold leading-none tracking-[-0.06em] text-[var(--header-text)] shadow-sm">{wedding.firstName.charAt(0)}&amp;{wedding.secondName.charAt(0)}</span>
-        <span className="hidden text-sm font-bold tracking-[0.11em] text-[var(--header-text)] uppercase sm:inline xl:text-base">{wedding.firstName} & {wedding.secondName}</span>
+        
       </Link>
       <nav className="hidden items-center gap-2 lg:flex xl:gap-3" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded-lg px-2 py-2 text-[0.875rem] font-semibold leading-snug text-[var(--header-text)] transition-colors hover:bg-white/10 hover:text-[var(--header-hover)] xl:text-[0.9375rem]">{s.label}</Link>)}</nav>
       <MobileNavigation navigation={navigation} />
