@@ -20,7 +20,7 @@ function AdminNav() {
   return (
     <nav className="space-y-1" aria-label="Navegação administrativa">
       {items.map(([label, href]) => (
-        <Link key={href} href={href} className="focus-ring block rounded-xl px-3 py-2.5 text-sm text-white/72 transition hover:bg-white/10 hover:text-white">
+        <Link key={href} href={href} className="focus-ring block rounded-xl px-3 py-3 text-[0.9375rem] font-semibold text-white/95 transition hover:bg-white/15 hover:text-white">
           {label}
         </Link>
       ))}
@@ -32,15 +32,15 @@ export function AdminShell({ children, email, initials }: { children: React.Reac
   return (
     <div className="min-h-screen bg-[#f4f1ec] lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="hidden min-h-screen border-r border-line bg-[#24261f] p-6 text-white lg:block">
-        <Link href="/" className="font-editorial text-2xl">{initials}</Link>
-        <p className="mt-2 text-xs text-white/50">Administração do casamento</p>
+        <Link href="/" className="font-editorial inline-flex min-h-14 min-w-14 items-center justify-center rounded-full border-2 border-white/75 bg-white/10 px-2 text-3xl font-bold tracking-[-0.07em] text-white">{initials}</Link>
+        <p className="mt-3 text-sm font-medium text-white/85">Administração do casamento</p>
         <div className="mt-10"><AdminNav /></div>
       </aside>
       <div>
         <header className="flex min-h-[4.5rem] items-center justify-between border-b border-line bg-surface px-5 sm:px-8">
           <div className="flex items-center gap-3">
             <details className="relative lg:hidden">
-              <summary className="focus-ring cursor-pointer list-none rounded-full border border-line px-3 py-2 text-xs font-bold uppercase">Menu</summary>
+              <summary className="focus-ring cursor-pointer list-none rounded-full border border-line px-4 py-2.5 text-sm font-bold uppercase">Menu</summary>
               <div className="absolute left-0 z-40 mt-3 w-64 rounded-2xl bg-[#24261f] p-3 text-white shadow-2xl"><AdminNav /></div>
             </details>
             <div>
@@ -49,7 +49,7 @@ export function AdminShell({ children, email, initials }: { children: React.Reac
             </div>
           </div>
           <form action={logoutAction}>
-            <button className="focus-ring rounded-full border border-line px-4 py-2 text-xs font-bold transition hover:bg-background">Sair</button>
+            <button className="focus-ring rounded-full border border-line px-4 py-2.5 text-sm font-bold transition hover:bg-background">Sair</button>
           </form>
         </header>
         <main className="p-5 sm:p-8 lg:p-10">{children}</main>

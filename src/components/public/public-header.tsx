@@ -6,12 +6,12 @@ import { sections, type Appearance } from "@/services/wedding/appearance";
 export function PublicHeader({ wedding, visible }: { wedding: PublicWedding; visible: Appearance["visible"] }) {
   const navigation=[{label:"Home",href:"/"},...sections.filter(s=>visible[s.key]).map(s=>({label:s.title,href:s.href}))];
   return <header className="fixed inset-x-0 top-0 z-50 border-b border-white/15 bg-[var(--header-bg)]/95 text-[var(--header-text)] backdrop-blur-xl">
-    <div className="page-shell flex h-[4.5rem] items-center justify-between gap-4">
+    <div className="page-shell flex h-[5rem] items-center justify-between gap-3 xl:gap-5">
       <Link href="/" className="focus-ring flex items-center gap-3 rounded-full" aria-label="Página inicial">
-        <span className="font-editorial grid size-10 place-items-center rounded-full border border-current/35 text-sm">{wedding.initials}</span>
-        <span className="hidden text-xs font-semibold tracking-[0.18em] uppercase sm:inline">{wedding.firstName} & {wedding.secondName}</span>
+        <span className="font-editorial grid size-13 shrink-0 place-items-center rounded-full border-2 border-current/80 bg-white/10 text-[1.45rem] font-bold leading-none tracking-[-0.07em] text-[var(--header-text)] shadow-sm">{wedding.initials}</span>
+        <span className="hidden text-sm font-bold tracking-[0.11em] text-[var(--header-text)] uppercase sm:inline xl:text-base">{wedding.firstName} & {wedding.secondName}</span>
       </Link>
-      <nav className="hidden items-center gap-5 lg:flex" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded text-xs text-[var(--header-text)]/85 hover:text-[var(--header-hover)]">{s.label}</Link>)}</nav>
+      <nav className="hidden items-center gap-2 lg:flex xl:gap-3" aria-label="Navegação principal">{navigation.map(s=><Link key={s.href} href={s.href} className="focus-ring rounded-lg px-2 py-2 text-[0.875rem] font-semibold leading-snug text-[var(--header-text)] transition-colors hover:bg-white/10 hover:text-[var(--header-hover)] xl:text-[0.9375rem]">{s.label}</Link>)}</nav>
       <MobileNavigation navigation={navigation} />
     </div>
   </header>;
