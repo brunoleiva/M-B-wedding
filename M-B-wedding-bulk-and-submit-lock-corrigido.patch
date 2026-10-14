@@ -1,0 +1,165 @@
+--- a/src/app/admin/(protected)/layout.tsx
++++ b/src/app/admin/(protected)/layout.tsx
+@@ -1,5 +1,6 @@
+ import { redirect } from "next/navigation";
+ import { AdminShell } from "@/components/admin/admin-shell";
++import { SubmitLock } from "@/components/shared/submit-lock";
+ import { createSupabaseServerClient } from "@/lib/supabase/server";
+ import { getAdminContext } from "@/services/admin/dashboard";
+ 
+@@ -14,5 +15,5 @@
+   const initials = wedding?.first_name && wedding?.second_name
+     ? `${wedding.first_name.trim().charAt(0).toLocaleUpperCase("pt-BR")} & ${wedding.second_name.trim().charAt(0).toLocaleUpperCase("pt-BR")}`
+     : "M & B";
+-  return <AdminShell email={context.email} initials={initials}>{children}</AdminShell>;
++  return <><SubmitLock /><AdminShell email={context.email} initials={initials}>{children}</AdminShell></>;
+ }
+--- a/src/app/(public)/layout.tsx
++++ b/src/app/(public)/layout.tsx
+@@ -1,6 +1,7 @@
+ import { PublicFooter } from "@/components/public/public-footer";
+ import { getPublicWedding } from "@/services/wedding/public";
+ import { PublicHeader } from "@/components/public/public-header";
++import { SubmitLock } from "@/components/shared/submit-lock";
+ import { getAppearance, appearanceStyle } from "@/services/wedding/appearance";
+ 
+ export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+@@ -8,6 +9,7 @@
+   const appearance = await getAppearance();
+   return (
+     <div style={appearanceStyle(appearance.colors)} className="min-h-screen bg-background text-foreground">
++      <SubmitLock />
+       <PublicHeader wedding={wedding} visible={appearance.visible} />
+       <main>{children}</main>
+       <PublicFooter wedding={wedding} visible={appearance.visible} />
+--- a/src/app/admin/(protected)/convidados/familias/[id]/page.tsx
++++ b/src/app/admin/(protected)/convidados/familias/[id]/page.tsx
+@@ -2,4 +2,5 @@
+ import {getAdminContext} from "@/services/admin/dashboard";
+ import {loadGuests} from "@/services/rsvp/admin";
+ import {FamilyEditor} from "../family-form";
+-export default async function FamilyDetail({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{saved?:string;error?:string}>}){const ctx=await getAdminContext();if(!ctx)return null;const {id}=await params;const {groups,guests}=await loadGuests(ctx.weddingId);const group=groups.find(g=>g.id===id);if(!group)notFound();return <FamilyEditor group={group} members={guests.filter(g=>g.guest_group_id===id)} params={await searchParams}/>}
++import { BulkGuestEntry } from "@/components/admin/bulk-guest-entry";
++export default async function FamilyDetail({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{saved?:string;error?:string;added?:string}>}){const ctx=await getAdminContext();if(!ctx)return null;const {id}=await params;const {groups,guests}=await loadGuests(ctx.weddingId);const group=groups.find(g=>g.id===id);if(!group)notFound();const query=await searchParams;return <><FamilyEditor group={group} members={guests.filter(g=>g.guest_group_id===id)} params={query}/><div className="mx-auto mt-6 max-w-4xl space-y-4">{query.added&&<p role="status" className="rounded-xl border border-green-200 bg-green-50 p-4 font-semibold text-green-900">{query.added} convidado(s) cadastrado(s) nesta família!</p>}<BulkGuestEntry groupId={group.id}/></div></>;}
+--- /dev/null
++++ b/src/components/shared/submit-lock.tsx
+@@ -0,0 +1,45 @@
++"use client";
++
++import { useEffect } from "react";
++
++/** Prevents repeated form submits while a server action is in flight. */
++export function SubmitLock() {
++  useEffect(() => {
++    function handleSubmit(event: Event) {
++      const form = event.target;
++      if (!(form instanceof HTMLFormElement)) return;
++      if (form.dataset.submitting === "true") {
++        event.preventDefault();
++        event.stopImmediatePropagation();
++        return;
++      }
++      form.dataset.submitting = "true";
++      const buttons = Array.from(form.querySelectorAll<HTMLButtonElement>('button[type="submit"], button:not([type])'));
++      // Delay disabling until the browser / React has collected the form values.
++      queueMicrotask(() => {
++        for (const button of buttons) {
++          button.disabled = true;
++          button.setAttribute("aria-busy", "true");
++          if (!button.dataset.originalText) button.dataset.originalText = button.textContent ?? "";
++          button.textContent = "Salvando...";
++        }
++      });
++      // Recovery for validation/server errors that keep the user on the same page.
++      const restore = () => {
++        form.dataset.submitting = "false";
++        buttons.forEach((button) => {
++          button.disabled = false;
++          button.removeAttribute("aria-busy");
++          if (button.dataset.originalText !== undefined) {
++            button.textContent = button.dataset.originalText;
++            delete button.dataset.originalText;
++          }
++        });
++      };
++      window.setTimeout(restore, 20000);
++    }
++    document.addEventListener("submit", handleSubmit, true);
++    return () => document.removeEventListener("submit", handleSubmit, true);
++  }, []);
++  return null;
++}
+--- /dev/null
++++ b/src/app/admin/(protected)/convidados/familias/bulk-actions.ts
+@@ -0,0 +1,43 @@
++"use server";
++
++import { redirect } from "next/navigation";
++import { revalidatePath } from "next/cache";
++import { getAdminContext } from "@/services/admin/dashboard";
++import { createSupabaseServerClient } from "@/lib/supabase/server";
++
++const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
++
++export async function addGuestsInBulk(form: FormData) {
++  const ctx = await getAdminContext();
++  if (!ctx) redirect("/admin/login?error=unauthorized");
++  const groupId = String(form.get("group_id") ?? "");
++  if (!uuid.test(groupId)) redirect("/admin/convidados/familias?error=group");
++  const back = `/admin/convidados/familias/${groupId}`;
++  const raw = String(form.get("names") ?? "");
++  const names = raw.split(/\r?\n/).map(name => name.trim()).filter(Boolean);
++  const kind = String(form.get("kind") ?? "adult");
++  if (!names.length || names.length > 50 || names.some(name => name.length > 180) || !["adult", "child"].includes(kind)) {
++    redirect(`${back}?error=bulk_fields`);
++  }
++  const database = await createSupabaseServerClient();
++  if (!database) redirect(`${back}?error=db`);
++  const { data: group, error: groupError } = await database.from("guest_groups")
++    .select("id").eq("id", groupId).eq("wedding_id", ctx.weddingId)
++    .is("deleted_at", null).maybeSingle();
++  if (groupError || !group) redirect(`${back}?error=group`);
++  // One database request inserts the batch; the family is fixed by the server-side group ID.
++  const rows = names.map(full_name => ({
++    wedding_id: ctx.weddingId,
++    guest_group_id: groupId,
++    full_name,
++    kind,
++    rsvp_status: "pending",
++  }));
++  const { error } = await database.from("guests").insert(rows);
++  if (error) redirect(`${back}?error=db`);
++  revalidatePath(back);
++  revalidatePath("/admin/convidados");
++  revalidatePath("/admin/rsvp");
++  revalidatePath("/admin");
++  redirect(`${back}?added=${names.length}`);
++}
+--- /dev/null
++++ b/src/components/admin/bulk-guest-entry.tsx
+@@ -0,0 +1,25 @@
++import { addGuestsInBulk } from "@/app/admin/(protected)/convidados/familias/bulk-actions";
++
++export function BulkGuestEntry({ groupId }: { groupId: string }) {
++  return (
++    <section className="card-soft space-y-4 p-5 sm:p-8">
++      <div>
++        <h2 className="text-xl font-semibold">Adicionar vários convidados</h2>
++        <p className="mt-2 text-sm text-muted">Digite um nome por linha. Todos serão adicionados a esta família e ficarão aguardando confirmação. Até 50 nomes por envio.</p>
++      </div>
++      <form action={addGuestsInBulk} className="space-y-4">
++        <input type="hidden" name="group_id" value={groupId} />
++        <label className="block font-semibold">Nomes dos convidados
++          <textarea name="names" required rows={8} maxLength={10000} className="guest-input min-h-48" placeholder={"João Silva\nMaria Silva\nPedro Silva"} />
++        </label>
++        <label className="block font-semibold">Tipo de convidado
++          <select name="kind" defaultValue="adult" className="guest-input">
++            <option value="adult">Adultos</option>
++            <option value="child">Crianças</option>
++          </select>
++        </label>
++        <button type="submit" className="admin-btn admin-btn--primary">Cadastrar todos nesta família</button>
++      </form>
++    </section>
++  );
++}

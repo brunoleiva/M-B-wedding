@@ -6,13 +6,12 @@ export function HeroSection({ wedding }: { wedding: PublicWedding }) {
   return (
     <section className="relative min-h-[760px] overflow-hidden bg-[#322a24] text-white sm:min-h-screen">
       <Image
-        src={wedding.heroImage}
-        alt="Foto provisória dos noivos em estilo editorial"
+        src="/images/home-proposal.jpg"
+        alt="Pedido de casamento em um jardim, com os noivos sob estruturas brancas"
         fill
         priority
         sizes="100vw"
-        unoptimized={wedding.heroImage.startsWith("https://")}
-        className="object-cover opacity-80"
+        className="object-cover object-[center_62%] opacity-85 sm:object-[center_68%]"
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(25,20,16,.35)_0%,rgba(25,20,16,.18)_42%,rgba(25,20,16,.76)_100%)]" />
       <div className="page-shell relative z-10 flex min-h-[760px] items-end pb-16 pt-32 sm:min-h-screen sm:pb-20">

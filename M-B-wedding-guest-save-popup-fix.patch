@@ -1,0 +1,93 @@
+--- a/src/app/admin/(protected)/convidados/actions.ts
++++ b/src/app/admin/(protected)/convidados/actions.ts
+@@ -22,7 +22,7 @@
+  const {data:group}=await db.from("guest_groups").select("id").eq("id",guest_group_id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).maybeSingle();if(!group)redirect(route+"?error=group");
+  const payload={guest_group_id,full_name,kind,rsvp_status:status,dietary_restrictions:dietary||null,guest_note:note||null,responded_at:status==="pending"?null:new Date().toISOString()};
+  const result=id?await db.from("guests").update(payload).eq("id",id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).select("id").maybeSingle():await db.from("guests").insert({...payload,wedding_id:ctx.weddingId}).select("id").maybeSingle();
+- if(result.error||!result.data)redirect(route+"?error=db");done();redirect(`${route}/${result.data.id}?saved=guest`);
++ if(result.error||!result.data)redirect(route+"?error=db");done();redirect(`${route}?saved=guest`);
+ }
+ export async function removeGuest(fd:FormData){const {ctx,db}=await access();const id=get(fd,"id");if(!uuid(id))redirect(route+"?error=fields");const {data,error}=await db.from("guests").update({deleted_at:new Date().toISOString()}).eq("id",id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();if(error||!data)redirect(route+"?error=db");done();redirect(route+"?removed=guest");}
+ export async function removeGroup(fd:FormData){const {ctx,db}=await access();const id=get(fd,"id");if(!uuid(id))redirect(route+"?error=fields");const {count:activeCount,error:countError}=await db.from("guests").select("id",{count:"exact",head:true}).eq("guest_group_id",id).eq("wedding_id",ctx.weddingId).is("deleted_at",null);if(countError||activeCount===null)redirect(route+"/familias?error=db");if(activeCount>0)redirect(route+"/familias?error=members");const {data,error}=await db.from("guest_groups").update({deleted_at:new Date().toISOString()}).eq("id",id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();if(error||!data)redirect(route+"?error=db");done();redirect(route+"/familias?removed=group");}
+--- a/src/app/admin/(protected)/convidados/guest-form.tsx
++++ b/src/app/admin/(protected)/convidados/guest-form.tsx
+@@ -5,4 +5,4 @@
+ import {StatusNotice,ConfirmSubmit} from "@/components/admin/guest-ui";
+ const kinds:GuestKind[]=["adult","child","companion"];
+ const statuses:GuestStatus[]=["pending","attending","not_attending"];
+-export function GuestEditor({guest,groups,params}:{guest?:GuestRecord;groups:GroupRecord[];params:{saved?:string;removed?:string;error?:string}}){return <div className="mx-auto max-w-3xl space-y-6"><Link className="text-sm font-semibold text-brand underline" href="/admin/convidados">← Voltar aos convidados</Link><header><p className="eyebrow">Cadastro individual</p><h1 className="font-editorial text-4xl">{guest?guest.full_name:"Novo convidado"}</h1><p className="text-muted">Edite os dados desta pessoa sem alterar os demais convidados.</p></header><StatusNotice {...params}/><section className="card-soft p-5 sm:p-8"><form action={saveGuest} className="space-y-5">{guest&&<input type="hidden" name="id" value={guest.id}/>}<div className="grid gap-4 sm:grid-cols-2"><label className="sm:col-span-2 font-semibold">Nome completo<input className="guest-input" name="full_name" defaultValue={guest?.full_name??""} required maxLength={180}/></label><label className="font-semibold">Família ou convite<select className="guest-input" name="guest_group_id" defaultValue={guest?.guest_group_id??groups[0]?.id} required>{groups.map(g=><option key={g.id} value={g.id}>{g.display_name}</option>)}</select></label><label className="font-semibold">Tipo<select className="guest-input" name="kind" defaultValue={guest?.kind??"adult"}>{kinds.map(k=><option key={k} value={k}>{kindLabel(k)}</option>)}</select></label><label className="font-semibold">Situação da presença<select className="guest-input" name="rsvp_status" defaultValue={guest?.rsvp_status??"pending"}>{statuses.map(s=><option key={s} value={s}>{statusLabel(s)}</option>)}</select></label><label className="font-semibold">Última resposta<input className="guest-input" readOnly value={guest?.responded_at?new Date(guest.responded_at).toLocaleString("pt-BR"):"Ainda não respondeu"}/></label><label className="sm:col-span-2 font-semibold">Observações (opcional)<textarea className="guest-input min-h-24" name="guest_note" maxLength={1000} defaultValue={guest?.guest_note??""}/></label><label className="sm:col-span-2 font-semibold">Restrições registradas anteriormente (opcional)<input className="guest-input" name="dietary_restrictions" maxLength={500} defaultValue={guest?.dietary_restrictions??""}/></label></div><div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{guest?"Salvar convidado":"Cadastrar convidado"}</button><Link href="/admin/convidados" className="rounded-full border border-line px-5 py-3 font-semibold hover:bg-black/5">Cancelar</Link></div></form></section>{guest&&<div className="card-soft p-5"><ConfirmSubmit action={removeGuest} question="Arquivar este convidado?"><input type="hidden" name="id" value={guest.id}/><p className="mb-3 text-sm text-muted">Arquivar remove o convidado das listas ativas, preservando o histórico no banco.</p><button type="submit" className="font-semibold text-red-800 underline hover:text-red-600">Arquivar convidado</button></ConfirmSubmit></div>}</div>}
++export function GuestEditor({guest,groups,params}:{guest?:GuestRecord;groups:GroupRecord[];params:{saved?:string;removed?:string;error?:string}}){return <div className="mx-auto max-w-3xl space-y-6"><Link className="focus-ring inline-flex min-h-11 w-fit items-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-base font-bold text-brand shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand/10 hover:shadow-md active:translate-y-0" href="/admin/convidados"><span aria-hidden="true" className="text-xl leading-none">←</span> Voltar aos convidados</Link><header><p className="eyebrow">Cadastro individual</p><h1 className="font-editorial text-4xl">{guest?guest.full_name:"Novo convidado"}</h1><p className="text-muted">Edite os dados desta pessoa sem alterar os demais convidados.</p></header><StatusNotice {...params}/><section className="card-soft p-5 sm:p-8"><form action={saveGuest} className="space-y-5">{guest&&<input type="hidden" name="id" value={guest.id}/>}<div className="grid gap-4 sm:grid-cols-2"><label className="sm:col-span-2 font-semibold">Nome completo<input className="guest-input" name="full_name" defaultValue={guest?.full_name??""} required maxLength={180}/></label><label className="font-semibold">Família ou convite<select className="guest-input" name="guest_group_id" defaultValue={guest?.guest_group_id??groups[0]?.id} required>{groups.map(g=><option key={g.id} value={g.id}>{g.display_name}</option>)}</select></label><label className="font-semibold">Tipo<select className="guest-input" name="kind" defaultValue={guest?.kind??"adult"}>{kinds.map(k=><option key={k} value={k}>{kindLabel(k)}</option>)}</select></label><label className="font-semibold">Situação da presença<select className="guest-input" name="rsvp_status" defaultValue={guest?.rsvp_status??"pending"}>{statuses.map(s=><option key={s} value={s}>{statusLabel(s)}</option>)}</select></label><label className="font-semibold">Última resposta<input className="guest-input" readOnly value={guest?.responded_at?new Date(guest.responded_at).toLocaleString("pt-BR"):"Ainda não respondeu"}/></label><label className="sm:col-span-2 font-semibold">Observações (opcional)<textarea className="guest-input min-h-24" name="guest_note" maxLength={1000} defaultValue={guest?.guest_note??""}/></label><label className="sm:col-span-2 font-semibold">Restrições registradas anteriormente (opcional)<input className="guest-input" name="dietary_restrictions" maxLength={500} defaultValue={guest?.dietary_restrictions??""}/></label></div><div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{guest?"Salvar convidado":"Cadastrar convidado"}</button><Link href="/admin/convidados" className="rounded-full border border-line px-5 py-3 font-semibold hover:bg-black/5">Cancelar</Link></div></form></section>{guest&&<div className="card-soft p-5"><ConfirmSubmit action={removeGuest} question="Arquivar este convidado?"><input type="hidden" name="id" value={guest.id}/><p className="mb-3 text-sm text-muted">Arquivar remove o convidado das listas ativas, preservando o histórico no banco.</p><button type="submit" className="font-semibold text-red-800 underline hover:text-red-600">Arquivar convidado</button></ConfirmSubmit></div>}</div>}
+--- a/src/app/admin/(protected)/convidados/page.tsx
++++ b/src/app/admin/(protected)/convidados/page.tsx
+@@ -30,7 +30,7 @@
+   const counts = { attending:0, not_attending:0, pending:0 }; all.forEach(g=>counts[g.rsvp_status]++);
+   return <div className="space-y-7">
+     <header className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow">Organização</p><h1 className="font-editorial text-4xl sm:text-5xl">Convidados</h1><p className="mt-2 text-muted">Consulte, filtre e abra o cadastro de cada pessoa.</p></div><div className="flex flex-wrap gap-2"><Link className={pill} href="/admin/convidados/familias">Famílias e convites</Link><Link className="btn-primary" href="/admin/convidados/novo">+ Novo convidado</Link></div></header>
+-    <StatusNotice saved={params.saved} removed={params.removed} error={params.error}/>
++    <StatusNotice error={params.error}/>
+     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{([ ["Total",all.length],["Confirmados",counts.attending],["Não irão",counts.not_attending],["Aguardando",counts.pending] ] as const).map(([label,num])=><div key={label} className="card-soft p-4 sm:p-6"><p className="text-sm text-muted">{label}</p><p className="mt-2 text-3xl font-semibold tabular-nums">{num}</p></div>)}</div>
+     <section className="card-soft space-y-4 p-4 sm:p-6"><form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><label className="lg:col-span-2 text-sm font-semibold">Buscar nome ou família<input className="guest-input" name="q" type="search" defaultValue={params.q??""} placeholder="Ex.: Maysa"/></label><label className="text-sm font-semibold">Presença<select className="guest-input" name="status" defaultValue={status}><option value="">Todas</option>{statuses.map(s=><option key={s} value={s}>{statusLabel(s)}</option>)}</select></label><label className="text-sm font-semibold">Tipo<select className="guest-input" name="kind" defaultValue={kind}><option value="">Todos</option>{kinds.map(k=><option key={k} value={k}>{kindLabel(k)}</option>)}</select></label><label className="text-sm font-semibold">Ordenar<select className="guest-input" name="sort" defaultValue={params.sort??"name"}><option value="name">Nome A–Z</option><option value="family">Família</option><option value="recent">Resposta recente</option></select></label><div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-5"><button className="btn-primary" type="submit">Aplicar filtros</button><Link href="/admin/convidados" className={pill}>Limpar</Link><Link href="/admin/convidados/exportar" className={pill}>Exportar todos (CSV)</Link><Link href="/admin/rsvp" className={pill}>Painel RSVP</Link></div></form>
+     <p className="text-sm text-muted">Exibindo {visible.length ? (page-1)*pageSize+1 : 0}–{Math.min(page*pageSize,filtered.length)} de {filtered.length} convidados encontrados.</p>
+--- a/src/components/admin/save-success-modal.tsx
++++ b/src/components/admin/save-success-modal.tsx
+@@ -1,16 +1,18 @@
+ "use client";
+ 
+-import { useEffect, useRef, useState } from "react";
+-import { usePathname, useSearchParams } from "next/navigation";
++import { useCallback, useEffect, useRef, useState } from "react";
++import { usePathname, useRouter, useSearchParams } from "next/navigation";
+ 
+ /** Success is signalled by the existing server-action redirects, never optimistically. */
+ export function SaveSuccessModal() {
+   const pathname = usePathname();
++  const router = useRouter();
+   const params = useSearchParams();
+   const success = params.get("saved") ?? params.get("removed");
+   const [open, setOpen] = useState(false);
+   const closeButton = useRef<HTMLButtonElement>(null);
+   const messages: Record<string, {title: string; description: string}> = {
++    guest: {title: "Convidado salvo!", description: "As informações foram registradas com sucesso."},
+     save_colors: {title: "Cores salvas", description: "As cores em uso foram atualizadas. A paleta padrão não foi alterada."},
+     set_default: {title: "Cor padrão alterada", description: "A paleta foi definida como padrão sem mudar as cores atualmente aplicadas."},
+     restore: {title: "Voltou ao padrão", description: "As cores padrão foram aplicadas ao site."},
+@@ -26,25 +28,35 @@
+     setOpen(Boolean(success));
+   }, [pathname, success]);
+ 
++  const close = useCallback(() => {
++    setOpen(false);
++    // Na lista de convidados, remova o sinalizador para o aviso não voltar.
++    if (pathname === "/admin/convidados" && success === "guest") {
++      const query = new URLSearchParams(params.toString());
++      query.delete("saved");
++      router.replace(query.size ? `${pathname}?${query.toString()}` : pathname, { scroll: false });
++    }
++  }, [pathname, success, params, router]);
++
+   useEffect(() => {
+     if (!open) return;
+     closeButton.current?.focus();
+     function onKeyDown(e: KeyboardEvent) {
+-      if (e.key === "Escape") setOpen(false);
++      if (e.key === "Escape") close();
+       if (e.key === "Tab") { e.preventDefault(); closeButton.current?.focus(); }
+     }
+     document.addEventListener("keydown", onKeyDown);
+     return () => document.removeEventListener("keydown", onKeyDown);
+-  }, [open]);
++  }, [open, close]);
+ 
+   if (!success || !open) return null;
+   return (
+-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false); }}>
++    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) close(); }}>
+       <div role="dialog" aria-modal="true" aria-labelledby="save-success-title" aria-describedby="save-success-description" className="w-full max-w-sm rounded-3xl bg-white p-8 text-center text-[#261f1a] shadow-2xl">
+         <div aria-hidden="true" className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-800">✓</div>
+         <h2 id="save-success-title" className="font-editorial text-3xl">{message.title}</h2>
+         <p id="save-success-description" className="mt-3 text-sm text-[#5f5d58]">{message.description}</p>
+-        <button ref={closeButton} type="button" onClick={() => setOpen(false)} className="focus-ring mt-7 min-h-12 w-full rounded-full bg-[#65704d] px-6 font-semibold text-white">Entendi</button>
++        <button ref={closeButton} type="button" onClick={close} className="focus-ring mt-7 min-h-12 w-full rounded-full bg-[#65704d] px-6 font-semibold text-white">Entendi</button>
+       </div>
+     </div>
+   );

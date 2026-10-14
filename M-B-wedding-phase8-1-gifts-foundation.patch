@@ -1,0 +1,299 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..58ceb0f
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,18 @@
++# Fase 8.1 — Banco e serviços de presentes
++
++Adiciona infraestrutura às tabelas **já existentes** (`gifts`, `gift_categories`, `gift_payments`, `wedding_private_settings`), com novos campos, controle preliminar de quantidade e eventos auditáveis. Nenhum registro existente é excluído.
++
++## Aplicação
++1. Execute primeiro `git apply --check` e `git apply` no repositório.
++2. Faça backup do Supabase e execute **apenas** `202610130009_gift_foundation.sql` no SQL Editor **uma vez**. Pressupõe que a migration inicial de 202610130001 já esteja aplicada.
++3. Rode `npm run check` e `npm run build` antes de enviar para Vercel.
++4. O catálogo pode permanecer oculto porque `gifts_enabled` inicia `false`. Nenhuma tela foi publicada nesta etapa.
++
++## Segurança e limitações
++- Remove a policy legada que permitia INSERT público direto em `gift_payments`. O checkout público será implementado com servidor e idempotência na **8.4**, não nesta etapa.
++- Consultas privadas do Pix devem ser feitas somente após verificação de administrador. Não serialize a resposta privada para o site público.
++- Status `confirmed` só é atualizado por operações administrativas em etapa futura. A função de auditoria grava alterações de status.
++- Os campos `quantity_total` e `availability_kind` são a base para disponibilidade. A reserva com concorrência transacional será adicionada junto do checkout, não está implementada aqui.
++- A confirmação Pix é manual inicialmente. **Não** considere um `pending_confirmation` como pagamento realizado.
++- `gift_payment_events` registra eventos futuros; não retroalimenta pagamentos já existentes.
++- Esta migration é incremental, não deve ser rodada junto com um script que recrie o esquema inicial.
+diff --git a/src/services/gifts/admin.ts b/src/services/gifts/admin.ts
+new file mode 100644
+index 0000000..4f3fe83
+--- /dev/null
++++ b/src/services/gifts/admin.ts
+@@ -0,0 +1,42 @@
++import { createSupabaseServerClient } from "@/lib/supabase/server";
++import { getAdminContext } from "@/services/admin/dashboard";
++import type { Gift, GiftPayment, GiftCategory } from "./types";
++
++async function context() {
++  const admin = await getAdminContext();
++  if (!admin) throw new Error("Acesso administrativo necessario");
++  const db = await createSupabaseServerClient();
++  if (!db) throw new Error("Supabase indisponivel");
++  return { db, weddingId: admin.weddingId };
++}
++
++export async function getAdminGifts(): Promise<{gifts: Gift[]; categories: GiftCategory[]}> {
++  const {db,weddingId} = await context();
++  const [a,b] = await Promise.all([
++    db.from("gifts").select("id,wedding_id,category_id,slug,title,description,image_path,amount_cents,gift_kind,availability_kind,quantity_total,is_featured,is_active,sort_order")
++      .eq("wedding_id", weddingId).is("deleted_at",null).order("sort_order"),
++    db.from("gift_categories").select("id,wedding_id,name,slug,sort_order")
++      .eq("wedding_id",weddingId).order("sort_order"),
++  ]);
++  if(a.error || b.error) throw new Error("Falha ao consultar catalogo administrativo");
++  return { gifts: (a.data??[]) as Gift[], categories: (b.data??[]) as GiftCategory[] };
++}
++
++export async function getAdminGiftPayments(): Promise<GiftPayment[]> {
++  const {db,weddingId} = await context();
++  const {data,error} = await db.from("gift_payments")
++    .select("id,gift_id,guest_name,amount_cents,quantity,status,admin_note,confirmed_at,created_at")
++    .eq("wedding_id",weddingId).is("deleted_at",null).order("created_at",{ascending:false});
++  if(error) throw new Error("Falha ao consultar pagamentos");
++  return (data??[]) as GiftPayment[];
++}
++
++/** Exclusivamente dados privados para telas administrativas; nunca chame de Server Component publico. */
++export async function getAdminPixSettings() {
++  const {db,weddingId} = await context();
++  const {data,error} = await db.from("wedding_private_settings")
++    .select("pix_receiver_name,pix_key,pix_city,gift_min_amount_cents,gift_max_amount_cents,gifts_enabled,gift_intro,gift_thank_you,gift_reservation_minutes")
++    .eq("wedding_id",weddingId).maybeSingle();
++  if(error) throw new Error("Falha ao consultar configuracoes Pix");
++  return data;
++}
+diff --git a/src/services/gifts/catalog.ts b/src/services/gifts/catalog.ts
+new file mode 100644
+index 0000000..4f4a191
+--- /dev/null
++++ b/src/services/gifts/catalog.ts
+@@ -0,0 +1,28 @@
++import { createSupabaseServerClient } from "@/lib/supabase/server";
++import type { Gift, GiftCategory } from "./types";
++
++/** Consultas exclusivamente publicas; nao incluem Pix nem dados financeiros. */
++export async function getPublicGiftCatalog(weddingId: string): Promise<{
++  gifts: Gift[];
++  categories: GiftCategory[];
++}> {
++  const db = await createSupabaseServerClient();
++  if (!db) return { gifts: [], categories: [] };
++
++  // RLS continua sendo a ultima linha de defesa.
++  const [giftsResult, categoriesResult] = await Promise.all([
++    db.from("gifts")
++      .select("id,wedding_id,category_id,slug,title,description,image_path,amount_cents,gift_kind,availability_kind,quantity_total,is_featured,is_active,sort_order")
++      .eq("wedding_id", weddingId).eq("is_active", true).is("deleted_at", null)
++      .order("sort_order").order("title"),
++    db.from("gift_categories")
++      .select("id,wedding_id,name,slug,sort_order")
++      .eq("wedding_id", weddingId).order("sort_order"),
++  ]);
++  if (giftsResult.error) throw new Error("Falha ao carregar os presentes");
++  if (categoriesResult.error) throw new Error("Falha ao carregar as categorias");
++  return {
++    gifts: (giftsResult.data ?? []) as Gift[],
++    categories: (categoriesResult.data ?? []) as GiftCategory[],
++  };
++}
+diff --git a/src/services/gifts/types.ts b/src/services/gifts/types.ts
+new file mode 100644
+index 0000000..91ce367
+--- /dev/null
++++ b/src/services/gifts/types.ts
+@@ -0,0 +1,43 @@
++export type GiftKind = "symbolic" | "physical" | "contribution";
++export type GiftAvailability = "unlimited" | "limited";
++export type PaymentStatus = "pending_confirmation" | "confirmed" | "rejected";
++
++export type Gift = {
++  id: string;
++  wedding_id: string;
++  category_id: string | null;
++  slug: string;
++  title: string;
++  description: string | null;
++  image_path: string | null;
++  amount_cents: number;
++  gift_kind: GiftKind;
++  availability_kind: GiftAvailability;
++  quantity_total: number | null;
++  is_featured: boolean;
++  is_active: boolean;
++  sort_order: number;
++};
++
++export type GiftCategory = {
++  id: string;
++  wedding_id: string;
++  name: string;
++  slug: string;
++  sort_order: number;
++};
++
++export type GiftPayment = {
++  id: string;
++  gift_id: string | null;
++  guest_name: string;
++  amount_cents: number;
++  quantity: number;
++  status: PaymentStatus;
++  admin_note: string | null;
++  confirmed_at: string | null;
++  created_at: string;
++};
++
++export const formatGiftAmount = (cents: number): string =>
++  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+diff --git a/supabase/migrations/202610130009_gift_foundation.sql b/supabase/migrations/202610130009_gift_foundation.sql
+new file mode 100644
+index 0000000..54c94c0
+--- /dev/null
++++ b/supabase/migrations/202610130009_gift_foundation.sql
+@@ -0,0 +1,138 @@
++-- Fase 8.1 — extensao nao destrutiva das tabelas de presentes existentes.
++-- Execute depois de 202610130001_initial_schema.sql. Nunca apaga registros.
++begin;
++
++alter table public.gifts
++  add column if not exists gift_kind text not null default 'symbolic',
++  add column if not exists availability_kind text not null default 'unlimited',
++  add column if not exists quantity_total integer,
++  add column if not exists published_at timestamptz;
++
++alter table public.gifts
++  add constraint gifts_kind_valid check (gift_kind in ('symbolic', 'physical', 'contribution')),
++  add constraint gifts_availability_valid check (availability_kind in ('unlimited', 'limited')),
++  add constraint gifts_quantity_valid check (
++    (availability_kind = 'unlimited' and quantity_total is null)
++    or (availability_kind = 'limited' and quantity_total is not null and quantity_total > 0)
++  );
++
++-- Configuracoes Pix ficam na tabela privada JA EXISTENTE, jamais em uma view publica.
++alter table public.wedding_private_settings
++  add column if not exists gifts_enabled boolean not null default false,
++  add column if not exists gift_intro text,
++  add column if not exists gift_thank_you text,
++  add column if not exists gift_reservation_minutes integer not null default 30;
++alter table public.wedding_private_settings
++  add constraint gift_reservation_minutes_valid check (gift_reservation_minutes between 5 and 1440);
++
++-- Pagamentos devem ser criados por um endpoint validado e autenticado no servidor
++-- na etapa 8.4; NAO permitir insert arbitrario pelo cliente publico.
++drop policy if exists "public may report gift payment" on public.gift_payments;
++
++-- Identificador da tentativa de checkout (futura etapa 8.4) evita criacao repetida.
++alter table public.gift_payments
++  add column if not exists request_key uuid,
++  add column if not exists quantity integer not null default 1,
++  add column if not exists reviewed_by uuid references auth.users(id),
++  add column if not exists reviewed_at timestamptz;
++alter table public.gift_payments
++  add constraint gift_payment_quantity_valid check (quantity between 1 and 50);
++create unique index if not exists gift_payments_request_key_unique
++  on public.gift_payments(wedding_id, request_key) where request_key is not null;
++
++-- Validacao entre referencias para evitar mistura de presentes/casamentos.
++create or replace function public.validate_gift_wedding_refs()
++returns trigger language plpgsql security definer set search_path = '' as $$
++begin
++  if tg_table_name = 'gifts' and new.category_id is not null then
++    if not exists (select 1 from public.gift_categories c
++                   where c.id = new.category_id and c.wedding_id = new.wedding_id) then
++      raise exception 'Categoria pertence a outro casamento';
++    end if;
++  elsif tg_table_name = 'gift_payments' and new.gift_id is not null then
++    if not exists (select 1 from public.gifts g
++                   where g.id = new.gift_id and g.wedding_id = new.wedding_id) then
++      raise exception 'Presente pertence a outro casamento';
++    end if;
++  end if;
++  return new;
++end;
++$$;
++drop trigger if exists gifts_wedding_refs on public.gifts;
++create trigger gifts_wedding_refs before insert or update of category_id,wedding_id on public.gifts
++  for each row execute function public.validate_gift_wedding_refs();
++drop trigger if exists payments_wedding_refs on public.gift_payments;
++create trigger payments_wedding_refs before insert or update of gift_id,wedding_id on public.gift_payments
++  for each row execute function public.validate_gift_wedding_refs();
++revoke execute on function public.validate_gift_wedding_refs() from public;
++
++-- Historico imutavel por interfaces publicas; administradores tem leitura apenas.
++create table if not exists public.gift_payment_events (
++  id uuid primary key default gen_random_uuid(),
++  wedding_id uuid not null references public.weddings(id) on delete cascade,
++  payment_id uuid not null references public.gift_payments(id) on delete cascade,
++  actor_user_id uuid references auth.users(id) on delete set null,
++  event_type text not null check (event_type in ('created','confirmed','rejected','reopened','note')),
++  previous_status public.payment_status,
++  next_status public.payment_status,
++  details text,
++  created_at timestamptz not null default now()
++);
++create index if not exists gift_payment_events_payment_date
++  on public.gift_payment_events(payment_id, created_at desc);
++alter table public.gift_payment_events enable row level security;
++drop policy if exists "admins read gift payment events" on public.gift_payment_events;
++create policy "admins read gift payment events" on public.gift_payment_events
++  for select to authenticated using (public.is_wedding_admin(wedding_id));
++
++-- Impede gravar evento de outro casamento, mesmo quando o ID do pagamento existe.
++create or replace function public.validate_gift_payment_event_wedding()
++returns trigger language plpgsql security definer set search_path = '' as $$
++begin
++  if not exists (select 1 from public.gift_payments p
++                 where p.id = new.payment_id and p.wedding_id = new.wedding_id) then
++    raise exception 'Pagamento e evento devem pertencer ao mesmo casamento';
++  end if;
++  return new;
++end;
++$$;
++drop trigger if exists gift_event_wedding_check on public.gift_payment_events;
++create trigger gift_event_wedding_check before insert or update on public.gift_payment_events
++  for each row execute function public.validate_gift_payment_event_wedding();
++
++-- Auditoria de mudancas de status; nao grava dados bancarios sensiveis.
++create or replace function public.audit_gift_payment_status()
++returns trigger language plpgsql security definer set search_path = '' as $$
++begin
++  if tg_op = 'INSERT' then
++    insert into public.gift_payment_events(wedding_id,payment_id,actor_user_id,event_type,next_status)
++    values(new.wedding_id,new.id,auth.uid(),'created',new.status);
++  elsif new.status is distinct from old.status then
++    insert into public.gift_payment_events(wedding_id,payment_id,actor_user_id,event_type,previous_status,next_status)
++    values(new.wedding_id,new.id,auth.uid(),
++      case when new.status = 'confirmed' then 'confirmed'
++           when new.status = 'rejected' then 'rejected' else 'reopened' end,
++      old.status,new.status);
++  end if;
++  return new;
++end;
++$$;
++drop trigger if exists audit_gift_payments_status on public.gift_payments;
++create trigger audit_gift_payments_status after insert or update of status on public.gift_payments
++  for each row execute function public.audit_gift_payment_status();
++
++-- O cliente publico nao pode modificar eventos. A trigger roda no contexto de
++-- proprietario da funcao; RLS e grants de escrita nao sao dados ao navegador.
++revoke all on public.gift_payment_events from anon, authenticated;
++grant select on public.gift_payment_events to authenticated;
++revoke execute on function public.validate_gift_payment_event_wedding() from public;
++revoke execute on function public.audit_gift_payment_status() from public;
++
++create index if not exists gifts_public_catalog_idx
++  on public.gifts(wedding_id, is_active, sort_order)
++  where deleted_at is null;
++create index if not exists gift_payments_gift_status_idx
++  on public.gift_payments(gift_id, status)
++  where deleted_at is null;
++
++commit;
