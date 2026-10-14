@@ -9,7 +9,9 @@ export function SaveSuccessModal() {
   const router = useRouter();
   const params = useSearchParams();
   const success = params.get("saved") ?? params.get("removed");
-  const [open, setOpen] = useState(false);
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const noticeKey = `${pathname}:${params.toString()}`;
+  const open = Boolean(success) && dismissedKey !== noticeKey;
   const closeButton = useRef<HTMLButtonElement>(null);
   const messages: Record<string, {title: string; description: string}> = {
     guest: {title: "Convidado salvo!", description: "As informações foram registradas com sucesso."},
@@ -24,19 +26,15 @@ export function SaveSuccessModal() {
     ? {title: "Exclusão concluída", description: "O registro foi removido com sucesso."}
     : messages[success ?? ""] ?? {title: "Informações salvas", description: "Suas alterações foram registradas com sucesso."};
 
-  useEffect(() => {
-    setOpen(Boolean(success));
-  }, [pathname, success]);
-
   const close = useCallback(() => {
-    setOpen(false);
+    setDismissedKey(noticeKey);
     // Na lista de convidados, remova o sinalizador para o aviso não voltar.
     if (pathname === "/admin/convidados" && success === "guest") {
       const query = new URLSearchParams(params.toString());
       query.delete("saved");
       router.replace(query.size ? `${pathname}?${query.toString()}` : pathname, { scroll: false });
     }
-  }, [pathname, success, params, router]);
+  }, [noticeKey, pathname, success, params, router]);
 
   useEffect(() => {
     if (!open) return;

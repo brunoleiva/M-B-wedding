@@ -17,12 +17,41 @@ export async function saveGroup(fd:FormData){
  if(result.error||!result.data)redirect(route+"?error=db");done();redirect(`${route}/familias/${result.data.id}?saved=group`);
 }
 export async function saveGuest(fd:FormData){
- const {ctx,db}=await access();const id=get(fd,"id"),guest_group_id=get(fd,"guest_group_id"),full_name=get(fd,"full_name"),kind=get(fd,"kind"),status=get(fd,"rsvp_status"),dietary=get(fd,"dietary_restrictions"),note=get(fd,"guest_note");
- if((id&&!uuid(id))||!uuid(guest_group_id)||!full_name||full_name.length>180||!["adult","child","companion"].includes(kind)||!["pending","attending","not_attending"].includes(status)||dietary.length>500||note.length>1000)redirect(route+"?error=fields");
+ const {ctx,db}=await access();const id=get(fd,"id"),guest_group_id=get(fd,"guest_group_id"),full_name=get(fd,"full_name"),kind=get(fd,"kind"),status=get(fd,"rsvp_status"),note=get(fd,"guest_note");
+ if((id&&!uuid(id))||!uuid(guest_group_id)||!full_name||full_name.length>180||!["adult","child","companion"].includes(kind)||!["pending","attending","not_attending"].includes(status)||note.length>1000)redirect(route+"?error=fields");
  const {data:group}=await db.from("guest_groups").select("id").eq("id",guest_group_id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).maybeSingle();if(!group)redirect(route+"?error=group");
- const payload={guest_group_id,full_name,kind,rsvp_status:status,dietary_restrictions:dietary||null,guest_note:note||null,responded_at:status==="pending"?null:new Date().toISOString()};
+ const payload={guest_group_id,full_name,kind,rsvp_status:status,guest_note:note||null,responded_at:status==="pending"?null:new Date().toISOString()};
  const result=id?await db.from("guests").update(payload).eq("id",id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).select("id").maybeSingle():await db.from("guests").insert({...payload,wedding_id:ctx.weddingId}).select("id").maybeSingle();
  if(result.error||!result.data)redirect(route+"?error=db");done();redirect(`${route}?saved=guest`);
+}
+
+export async function saveGuestsBatch(fd:FormData){
+ const {ctx,db}=await access();
+ const guest_group_id=get(fd,"guest_group_id");
+ if(!uuid(guest_group_id))redirect(route+"/novo?error=group");
+ const {data:group,error:groupError}=await db.from("guest_groups").select("id").eq("id",guest_group_id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).maybeSingle();
+ if(groupError||!group)redirect(route+"/novo?error=group");
+ let rows:unknown;
+ try {rows=JSON.parse(get(fd,"guests_json"));} catch {redirect(route+"/novo?error=fields");}
+ if(!Array.isArray(rows)||rows.length<1||rows.length>50)redirect(route+"/novo?error=fields");
+ const valid=rows.every((g:unknown)=>{
+   if(!g||typeof g!=="object")return false;
+   const item=g as Record<string,unknown>;
+   return typeof item.full_name==="string"&&item.full_name.trim().length>0&&item.full_name.trim().length<=180&&
+    ["adult","child","companion"].includes(String(item.kind))&&
+    ["pending","attending","not_attending"].includes(String(item.rsvp_status))&&
+    typeof item.guest_note==="string"&&item.guest_note.length<=1000;
+ });
+ if(!valid)redirect(route+"/novo?error=fields");
+ const payload=(rows as {full_name:string;kind:string;rsvp_status:string;guest_note:string}[]).map(g=>({
+   wedding_id:ctx.weddingId,guest_group_id,full_name:g.full_name.trim(),kind:g.kind,
+   rsvp_status:g.rsvp_status,guest_note:g.guest_note.trim()||null,
+   responded_at:g.rsvp_status==="pending"?null:new Date().toISOString()
+ }));
+ const {error}=await db.from("guests").insert(payload);
+ if(error)redirect(route+"/novo?error=db");
+ done();revalidatePath(`${route}/familias/${guest_group_id}`);
+ redirect(`${route}/familias/${guest_group_id}?saved=guest`);
 }
 export async function removeGuest(fd:FormData){const {ctx,db}=await access();const id=get(fd,"id");if(!uuid(id))redirect(route+"?error=fields");const {data,error}=await db.from("guests").update({deleted_at:new Date().toISOString()}).eq("id",id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();if(error||!data)redirect(route+"?error=db");done();redirect(route+"?removed=guest");}
 export async function removeGroup(fd:FormData){const {ctx,db}=await access();const id=get(fd,"id");if(!uuid(id))redirect(route+"?error=fields");const {count:activeCount,error:countError}=await db.from("guests").select("id",{count:"exact",head:true}).eq("guest_group_id",id).eq("wedding_id",ctx.weddingId).is("deleted_at",null);if(countError||activeCount===null)redirect(route+"/familias?error=db");if(activeCount>0)redirect(route+"/familias?error=members");const {data,error}=await db.from("guest_groups").update({deleted_at:new Date().toISOString()}).eq("id",id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();if(error||!data)redirect(route+"?error=db");done();redirect(route+"/familias?removed=group");}
