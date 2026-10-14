@@ -1,0 +1,11 @@
+import Link from "next/link";
+import {getAdminGifts} from "@/services/gifts/admin";
+import {saveGiftCategory,deleteGiftCategory} from "../actions";
+import {ConfirmDeleteForm} from "@/components/admin/confirm-delete-form";
+export default async function Categories({searchParams}:{searchParams:Promise<{error?:string}>}){
+ const {categories,gifts}=await getAdminGifts();const {error}=await searchParams;
+ return <div className="mx-auto max-w-4xl space-y-6"><Link className="admin-btn admin-btn--back" href="/admin/presentes">← Voltar aos presentes</Link><h1 className="font-editorial text-4xl">Categorias</h1>{error&&<p role="alert" className="text-red-800">Erro: {error==="used"?"Mova ou arquive os presentes desta categoria antes de excluir.":"Confira os dados ou um nome de URL já utilizado."}</p>}
+ <form action={saveGiftCategory} className="card-soft grid gap-3 p-5 sm:grid-cols-[1fr_1fr_auto]"><label className="font-semibold">Nova categoria<input className="guest-input" name="name" required maxLength={100} placeholder="Ex.: Lua de mel"/></label><label className="font-semibold">Ordem<input className="guest-input" name="sort_order" type="number" defaultValue={0} min={0} max={100000}/></label><button type="submit" className="admin-btn admin-btn--primary self-end">Adicionar</button></form>
+ {categories.map(c=><article key={c.id} className="card-soft space-y-3 p-5"><form action={saveGiftCategory} className="grid gap-3 sm:grid-cols-3"><input type="hidden" name="id" value={c.id}/><label>Nome<input className="guest-input" name="name" required maxLength={100} defaultValue={c.name}/></label><label>Ordem<input className="guest-input" name="sort_order" type="number" min={0} max={100000} defaultValue={c.sort_order}/></label><button className="admin-btn admin-btn--secondary self-end" type="submit">Salvar</button></form><p className="text-xs text-muted">{gifts.filter(g=>g.category_id===c.id).length} presentes vinculados · /{c.slug}</p><ConfirmDeleteForm action={deleteGiftCategory} question={`Você realmente deseja excluir a categoria ${c.name}?`} description="Só é possível excluir categorias sem presentes ativos."><input type="hidden" name="id" value={c.id}/><button type="submit" className="admin-btn admin-btn--danger">Excluir categoria</button></ConfirmDeleteForm></article>)}
+ </div>;
+}
