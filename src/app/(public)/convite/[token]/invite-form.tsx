@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { submitInvite } from "./actions";
 
@@ -9,6 +9,7 @@ type Guest = { id: string; name: string; status: "pending" | "attending" | "not_
 export function InviteForm({ token, guests, saved, error }: { token: string; guests: Guest[]; saved: boolean; error: boolean }) {
   const alreadyAnswered = guests.some((guest) => guest.status !== "pending");
   const [editing, setEditing] = useState(!alreadyAnswered);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!saved) return;
@@ -40,7 +41,7 @@ export function InviteForm({ token, guests, saved, error }: { token: string; gue
         </div>
       )}
 
-      <form action={submitInvite} className="card-soft mt-8 space-y-7 p-6 sm:p-9">
+      <form ref={formRef} action={submitInvite} className="card-soft mt-8 space-y-7 p-6 sm:p-9">
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="intent" value={alreadyAnswered ? "edit" : "create"} />
         {guests.map((guest) => (
@@ -59,7 +60,7 @@ export function InviteForm({ token, guests, saved, error }: { token: string; gue
         {guests.length === 0 ? <p className="text-lg">Este convite ainda não possui pessoas cadastradas.</p> : editing && (
           <div className="flex flex-col gap-3 sm:flex-row">
             <button type="submit" className="focus-ring min-h-14 flex-1 rounded-full bg-brand px-6 py-4 text-lg font-bold text-white transition hover:-translate-y-0.5 hover:brightness-110 active:scale-[.98]">{alreadyAnswered ? "Salvar novas respostas" : "Confirmar respostas"}</button>
-            {alreadyAnswered && <button type="button" onClick={() => setEditing(false)} className="focus-ring min-h-14 rounded-full border border-line px-6 py-4 text-lg font-semibold transition hover:bg-stone-100">Cancelar</button>}
+            {alreadyAnswered && <button type="button" onClick={() => { formRef.current?.reset(); setEditing(false); }} className="focus-ring min-h-14 rounded-full border border-line px-6 py-4 text-lg font-semibold transition hover:bg-stone-100">Cancelar</button>}
           </div>
         )}
       </form>

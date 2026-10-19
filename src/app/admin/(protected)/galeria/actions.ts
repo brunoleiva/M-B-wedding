@@ -26,10 +26,12 @@ export async function updatePhoto(form: FormData) {
   const id = String(form.get("id")??""); const alt=String(form.get("alt")??"").trim(); const caption=String(form.get("caption")??"").trim(); const sort=Number(form.get("sort")??0);
   if (!id || !alt || alt.length>200 || caption.length>500 || !Number.isSafeInteger(sort) || sort<0 || sort>100000) redirect("/admin/galeria?error=invalid_fields");
   const cover=form.get("cover")==="on";
-  // Single-cover invariant for the entire wedding, with a unique partial index in migration.
-  if (cover) { const {error}=await supabase.from("gallery_images").update({is_cover:false}).eq("wedding_id",ctx.weddingId).eq("is_cover",true); if (error) redirect("/admin/galeria?error=database"); }
-  const {error}=await supabase.from("gallery_images").update({alt_text:alt,caption:caption||null,sort_order:sort,is_cover:cover,is_published:form.get("published")==="on"}).eq("id",id).eq("wedding_id",ctx.weddingId);
-  if (error) redirect("/admin/galeria?error=database");
+  // A troca da capa e a edição são atômicas no banco.
+  const {error}=await supabase.rpc("update_gallery_photo_atomic",{
+    p_image_id:id,p_alt:alt,p_caption:caption||null,p_sort_order:sort,
+    p_is_cover:cover,p_is_published:form.get("published")==="on"
+  });
+  if(error)redirect("/admin/galeria?error=database");
   revalidatePath("/"); revalidatePath("/fotos");redirect("/admin/galeria?saved=1");
 }
 

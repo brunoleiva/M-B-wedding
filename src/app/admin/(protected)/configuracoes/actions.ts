@@ -54,7 +54,10 @@ export async function saveWeddingSettings(form: FormData) {
     event_at: eventAt, timezone: values.timezone, hero_subtitle: values.heroMessage || null,
     ...(heroImagePath ? { hero_image_path: heroImagePath } : {}),
   }).eq("id",context.weddingId);
-  if (error) redirect("/admin/configuracoes?error=database");
+  if (error) {
+    if(heroImagePath)await supabase.storage.from("wedding-media").remove([heroImagePath]);
+    redirect("/admin/configuracoes?error=database");
+  }
   // Local ainda não definido: não criar registro fictício nem exigir preenchimento.
   // Se houver um local antigo, despublicá-lo para não mostrar dados desatualizados.
   const { data: venue, error: venueLookupError } = await supabase.from("venues")

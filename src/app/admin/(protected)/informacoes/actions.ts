@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getAdminContext } from "@/services/admin/dashboard";
@@ -22,7 +22,14 @@ export async function saveInformation(f:FormData){
 export async function savePerson(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const name=val(f,"name",150);const role=val(f,"role_label",150);
  if(!name||!role)go("fields");
- let image_path=val(f,"existing_image_path");
+ // O caminho da imagem deve vir do banco, nunca de um campo editÃ¡vel do navegador.
+ let image_path="";
+ if(id){
+  const {data:existing,error}=await db.from("special_people").select("image_path").eq("id",id).eq("wedding_id",admin.weddingId).maybeSingle();
+  if(error||!existing)go("database");
+  image_path=existing?.image_path??"";
+ }
+ const previousImagePath=image_path;
  const photo=f.get("photo");
  if(photo instanceof File && photo.size>0){
   const ext:{[k:string]:string}={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"};
@@ -32,6 +39,9 @@ export async function savePerson(f:FormData){
  }
  const payload={wedding_id:admin.weddingId,name,role_label:role,category:val(f,"category",100)||"Outros",description:val(f,"description")||null,image_path:image_path||null,sort_order:order(f),is_published:selected(f,"is_published")};
  const result=id?await db.from("special_people").update(payload).eq("id",id).eq("wedding_id",admin.weddingId):await db.from("special_people").insert(payload);
+ if(result.error&&image_path&&image_path!==previousImagePath){
+  await db.storage.from("wedding-media").remove([image_path]);
+ }
  go(result.error?"database":undefined);
 }
 export async function saveFaq(f:FormData){
@@ -50,3 +60,4 @@ export async function deleteInfoItem(f:FormData){
  if(!["special_people","faqs","recommended_hotels"].includes(table)||!/^[0-9a-f-]{36}$/i.test(id))go("fields");
  const {error}=await db.from(table).delete().eq("wedding_id",admin.weddingId).eq("id",id);go(error?"database":undefined);
 }
+
