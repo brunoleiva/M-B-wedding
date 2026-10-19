@@ -17,6 +17,7 @@ export default async function GiftDetail({params,searchParams}:{params:Promise<{
    indisponivel:"Este presente não está disponível para uma nova contribuição no momento.",
    migration:"O pagamento ainda não está habilitado. Avise os noivos para verificarem a configuração do sistema.",
    pedido:"Não foi possível gerar o Pix agora. Tente novamente ou entre em contato com os noivos.",
+   limite:"Muitas solicitacoes recentes para este presente. Aguarde alguns minutos antes de tentar novamente.",
  };
  const error=query.erro?errors[query.erro]??errors.pedido:null;
  const image=gift.image_path&&db?db.storage.from("wedding-media").getPublicUrl(gift.image_path).data.publicUrl:null;

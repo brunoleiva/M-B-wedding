@@ -21,7 +21,7 @@ export default async function GiftOrderPage({params}:{params:Promise<{token:stri
     <Link className="admin-btn admin-btn--secondary" href="/presentes">← Voltar à lista</Link>
     <div className="card-soft space-y-5 p-6 text-center sm:p-9">
       <p className="eyebrow">Pagamento via Pix</p><h1 className="font-editorial text-4xl">{payment.gift_title}</h1>
-      <p className="text-muted">Presente registrado para {payment.guest_name}</p>
+      <p className="text-muted">Presente registrado para {payment.guest_name}</p><p className="font-mono text-sm font-semibold tracking-wider">Referencia: MB-{token.slice(0,8).toUpperCase()}</p>
       <p className="text-3xl font-bold text-brand-strong">{formatGiftAmount(payment.amount_cents)}</p>
       {payment.payment_status==="confirmed"?<p className="rounded-xl bg-green-50 p-4 font-semibold text-green-900">Pagamento confirmado pelos noivos. Obrigado! ❤️</p>:
        payment.payment_status==="rejected"?<p className="rounded-xl bg-red-50 p-4 text-red-800">Esta contribuição foi recusada. Entre em contato com os noivos.</p>:

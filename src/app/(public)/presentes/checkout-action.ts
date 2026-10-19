@@ -29,6 +29,7 @@ export async function createPixCheckout(form: FormData) {
     const text=`${error.message} ${error.hint??""}`.toLowerCase();
     const reason=text.includes("pix ainda nao configurado")?"configuracao":
       text.includes("esgotado")||text.includes("indisponivel")?"indisponivel":
+      text.includes("limite de pedidos")?"limite":
       error.code==="42883"?"migration":"pedido";
     redirect(`${back}?erro=${reason}`);
   }
