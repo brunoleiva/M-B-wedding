@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { submitInvite } from "./actions";
+import { SubmitButton } from "@/components/shared/submit-button";
 
 type Guest = { id: string; name: string; status: "pending" | "attending" | "not_attending"; note: string | null };
 
@@ -59,7 +60,7 @@ export function InviteForm({ token, guests, saved, error }: { token: string; gue
         ))}
         {guests.length === 0 ? <p className="text-lg">Este convite ainda não possui pessoas cadastradas.</p> : editing && (
           <div className="flex flex-col gap-3 sm:flex-row">
-            <button type="submit" className="focus-ring min-h-14 flex-1 rounded-full bg-brand px-6 py-4 text-lg font-bold text-white transition hover:-translate-y-0.5 hover:brightness-110 active:scale-[.98]">{alreadyAnswered ? "Salvar novas respostas" : "Confirmar respostas"}</button>
+            <SubmitButton pendingLabel="Enviando respostas..." className="focus-ring min-h-14 flex-1 rounded-full bg-brand px-6 py-4 text-lg font-bold text-white transition hover:-translate-y-0.5 hover:brightness-110 active:scale-[.98]">{alreadyAnswered ? "Salvar novas respostas" : "Confirmar respostas"}</SubmitButton>
             {alreadyAnswered && <button type="button" onClick={() => { formRef.current?.reset(); setEditing(false); }} className="focus-ring min-h-14 rounded-full border border-line px-6 py-4 text-lg font-semibold transition hover:bg-stone-100">Cancelar</button>}
           </div>
         )}

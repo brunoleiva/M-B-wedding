@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { SubmitLock } from "@/components/shared/submit-lock";
+
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAdminContext } from "@/services/admin/dashboard";
 
@@ -19,5 +19,5 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   const initials = wedding?.first_name && wedding?.second_name
     ? `${wedding.first_name.trim().charAt(0).toLocaleUpperCase("pt-BR")} & ${wedding.second_name.trim().charAt(0).toLocaleUpperCase("pt-BR")}`
     : "M & B";
-  return <><SubmitLock /><AdminShell email={context.email} initials={initials}>{children}</AdminShell></>;
+  return <AdminShell email={context.email} initials={initials}>{children}</AdminShell>;
 }

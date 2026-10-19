@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Gift,GiftCategory } from "@/services/gifts/types";
 import { saveGift,archiveGift } from "./actions";
 import { ConfirmDeleteForm } from "@/components/admin/confirm-delete-form";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GiftEditor({gift,categories,error}:{gift?:Gift;categories:GiftCategory[];error?:string}){
@@ -24,7 +25,7 @@ export async function GiftEditor({gift,categories,error}:{gift?:Gift;categories:
    <div className="sm:col-span-2 space-y-2"><label className="block font-semibold">Foto (JPG, PNG, WEBP; até 5 MB)<input type="file" name="image" accept="image/jpeg,image/png,image/webp" className="guest-input"/></label>{image&&<div className="relative h-48 w-48 overflow-hidden rounded-xl"><Image src={image} alt={gift?.title??"Presente"} fill unoptimized className="object-cover" sizes="192px"/></div>}</div>
    <label className="flex items-center gap-2 font-semibold"><input type="checkbox" name="is_active" defaultChecked={gift?.is_active??false}/> Publicar presente</label>
    <label className="flex items-center gap-2 font-semibold"><input type="checkbox" name="is_featured" defaultChecked={gift?.is_featured??false}/> Destacar no catálogo</label>
-   <div className="sm:col-span-2 flex flex-wrap gap-3"><button className="admin-btn admin-btn--primary" type="submit">{gift?"Salvar alterações":"Cadastrar presente"}</button><Link className="admin-btn admin-btn--secondary" href="/admin/presentes">Cancelar</Link></div>
+   <div className="sm:col-span-2 flex flex-wrap gap-3"><SubmitButton className="admin-btn admin-btn--primary" pendingLabel="Salvando presente...">{gift?"Salvar alterações":"Cadastrar presente"}</SubmitButton><Link className="admin-btn admin-btn--secondary" href="/admin/presentes">Cancelar</Link></div>
   </form>
   {gift&&<div className="card-soft p-5"><ConfirmDeleteForm action={archiveGift} question={`Você realmente deseja excluir o presente ${gift.title}?`} description="O presente será removido das listas e contagens. Seu registro continuará guardado para auditoria." confirmLabel="Sim, excluir"><input type="hidden" name="id" value={gift.id}/><button className="admin-btn admin-btn--danger" type="submit">Excluir presente</button></ConfirmDeleteForm></div>}
  </div>;
