@@ -27,16 +27,16 @@ export default async function GiftDetail({params,searchParams}:{params:Promise<{
   const image=gift.image_path&&db?db.storage.from("wedding-media").getPublicUrl(gift.image_path).data.publicUrl:null;
 
   return <section className="section-space public-inner-page">
-    <div className="page-shell mx-auto max-w-5xl space-y-6">
+    <div className="page-shell mx-auto w-full max-w-2xl space-y-4">
       <Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand-strong underline-offset-4 hover:underline" href="/presentes">← Voltar à lista de presentes</Link>
-      <article className="card-soft overflow-hidden lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="relative min-h-72 bg-surface-muted sm:min-h-96 lg:min-h-full">
-          {image?<Image src={image} alt={gift.title} fill unoptimized sizes="(max-width:1024px) 100vw, 50vw" className="object-cover"/>:<div className="grid h-full min-h-72 place-items-center text-7xl" aria-hidden="true">🎁</div>}
+      <article className="card-soft mx-auto w-full min-w-0 overflow-hidden rounded-2xl">
+        <div className="relative h-48 w-full overflow-hidden bg-surface-muted sm:h-60">
+          {image?<Image src={image} alt={gift.title} fill unoptimized sizes="(max-width: 672px) 100vw, 672px" className="object-cover"/>:<div className="grid h-full min-h-72 place-items-center text-7xl" aria-hidden="true">🎁</div>}
         </div>
-        <div className="space-y-6 p-5 sm:p-8 lg:p-10">
+        <div className="min-w-0 space-y-4 p-4 sm:p-6">
           <div className="space-y-3">
             <p className="eyebrow">Um presente com carinho</p>
-            <h1 className="font-editorial break-words text-4xl leading-tight sm:text-5xl">{gift.title}</h1>
+            <h1 className="font-editorial break-words text-2xl leading-tight sm:text-3xl">{gift.title}</h1>
             <p className="whitespace-pre-wrap leading-relaxed text-muted">{gift.description||"Uma contribuição carinhosa para essa nova etapa."}</p>
           </div>
           <div className="rounded-2xl border border-line bg-surface-muted px-5 py-4">
