@@ -16,7 +16,7 @@ export default async function PaymentsPage({searchParams}:{searchParams:Promise<
  const current=Math.min(Number(filters.page),totalPages);
  const visible=filtered.slice((current-1)*size,current*size);
  const active=payments.filter(p=>!p.deleted_at);
- const received=payments.filter(p=>p.status==="confirmed").reduce((sum,p)=>sum+p.amount_cents,0);
+ const received=active.filter(p=>p.status==="confirmed").reduce((sum,p)=>sum+p.amount_cents,0);
  const pending=active.filter(p=>financialStatus(p)==="pending_confirmation").reduce((sum,p)=>sum+p.amount_cents,0);
  const expired=active.filter(p=>financialStatus(p)==="expired").length;
  const makeUrl=(page:number)=>`${base}?${new URLSearchParams({...filters,page:String(page)}).toString()}`;
@@ -26,9 +26,9 @@ export default async function PaymentsPage({searchParams}:{searchParams:Promise<
   {query.error&&<p role="alert" className="rounded-xl border border-red-300 p-4 text-red-700">Não foi possível concluir a operação ({query.error}). Confira os logs da Vercel.</p>}
   {(query.saved||query.removed)&&<p role="status" className="rounded-xl border border-green-300 p-4 text-green-800">{query.removed?"Registro arquivado. O histórico financeiro foi mantido.":"Pagamento atualizado."}</p>}
   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-   {[["Recebido (inclui arquivados)",formatGiftAmount(received)],["Pendente no prazo",formatGiftAmount(pending)],["Reservas expiradas",String(expired)],["Registros arquivados",String(payments.length-active.length)]].map(([label,value])=><div className="card-soft p-5" key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-bold">{value}</p></div>)}
+   {[["Recebido",formatGiftAmount(received)],["Pendente no prazo",formatGiftAmount(pending)],["Reservas expiradas",String(expired)],["Pagamentos ativos",String(active.length)]].map(([label,value])=><div className="card-soft p-5" key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-bold">{value}</p></div>)}
   </div>
-  <p className="text-xs text-muted">Arquivar é apenas organizar o painel: não significa estornar o Pix. O total recebido representa pagamentos confirmados administrativamente, inclusive os arquivados.</p>
+  <p className="text-xs text-muted">Valores e quantidades ignoram registros excluídos. Excluir no site não estorna um Pix recebido: confira também o extrato bancário.</p>
   <form action={base} method="get" className="card-soft grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
    <label className="text-sm font-semibold xl:col-span-2">Convidado, presente ou referência<input name="q" type="search" defaultValue={filters.q} maxLength={120} placeholder="Pesquisar" className="guest-input mt-1 w-full"/></label>
    <label className="text-sm font-semibold">Situação<select name="status" defaultValue={filters.status} className="guest-input mt-1 w-full"><option value="">Todos</option><option value="pending_confirmation">Pendente</option><option value="expired">Reserva expirada</option><option value="confirmed">Confirmado</option><option value="rejected">Rejeitado</option><option value="archived">Arquivados</option></select></label>

@@ -8,6 +8,8 @@ export function SubmitLock() {
     function handleSubmit(event: Event) {
       const form = event.target;
       if (!(form instanceof HTMLFormElement)) return;
+      // A confirmação apenas abre o modal; cancelar não é submeter dados.
+      if (form.matches("[data-confirmation-form]") || form.method.toLowerCase() === "get" || event.defaultPrevented) return;
       if (form.dataset.submitting === "true") {
         event.preventDefault();
         event.stopImmediatePropagation();

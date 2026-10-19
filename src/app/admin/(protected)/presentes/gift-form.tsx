@@ -26,6 +26,6 @@ export async function GiftEditor({gift,categories,error}:{gift?:Gift;categories:
    <label className="flex items-center gap-2 font-semibold"><input type="checkbox" name="is_featured" defaultChecked={gift?.is_featured??false}/> Destacar no catálogo</label>
    <div className="sm:col-span-2 flex flex-wrap gap-3"><button className="admin-btn admin-btn--primary" type="submit">{gift?"Salvar alterações":"Cadastrar presente"}</button><Link className="admin-btn admin-btn--secondary" href="/admin/presentes">Cancelar</Link></div>
   </form>
-  {gift&&<div className="card-soft p-5"><ConfirmDeleteForm action={archiveGift} question={`Você realmente deseja arquivar o presente ${gift.title}?`} description="O presente sairá do catálogo público, mas o histórico financeiro será preservado." confirmLabel="Sim, arquivar"><input type="hidden" name="id" value={gift.id}/><button className="admin-btn admin-btn--danger" type="submit">Arquivar presente</button></ConfirmDeleteForm></div>}
+  {gift&&<div className="card-soft p-5"><ConfirmDeleteForm action={archiveGift} question={`Você realmente deseja excluir o presente ${gift.title}?`} description="O presente será removido das listas e contagens. Seu registro continuará guardado para auditoria." confirmLabel="Sim, excluir"><input type="hidden" name="id" value={gift.id}/><button className="admin-btn admin-btn--danger" type="submit">Excluir presente</button></ConfirmDeleteForm></div>}
  </div>;
 }

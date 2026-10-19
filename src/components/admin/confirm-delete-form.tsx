@@ -31,7 +31,7 @@ export function ConfirmDeleteForm({ children, question, description, confirmLabe
   }
 
   return <>
-    <form ref={formRef} onSubmit={submit} className={className}>{children}</form>
+    <form ref={formRef} data-confirmation-form onSubmit={submit} className={className}>{children}</form>
     {open && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 py-6" onMouseDown={event => { if (!pending && event.target === event.currentTarget) setOpen(false); }}>
       <div role="alertdialog" aria-modal="true" aria-labelledby="confirm-delete-title" aria-describedby="confirm-delete-description" className="w-full max-w-md rounded-2xl bg-white p-6 text-slate-900 shadow-2xl sm:p-8" onKeyDown={event => { if (!pending && event.key === "Escape") setOpen(false); }}>
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-2xl text-red-700" aria-hidden="true">!</div>
