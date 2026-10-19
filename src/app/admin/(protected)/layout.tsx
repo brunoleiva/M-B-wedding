@@ -4,6 +4,10 @@ import { SubmitLock } from "@/components/shared/submit-lock";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAdminContext } from "@/services/admin/dashboard";
 
+// All routes in this protected area require request-scoped authentication.
+// Never prerender them without the visitor's session during next build.
+export const dynamic = "force-dynamic";
+
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const context = await getAdminContext();
   if (!context) redirect("/admin/login?error=unauthorized");
