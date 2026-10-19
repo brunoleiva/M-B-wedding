@@ -16,10 +16,10 @@ export async function saveGift(fd:FormData){
  const id=read(fd,"id"),title=read(fd,"title"),slug=slugify(read(fd,"slug")||title),description=read(fd,"description"),category=read(fd,"category_id");
  const price=read(fd,"amount");const parsed=/^\d{1,7}(?:[.,]\d{1,2})?$/.test(price)?Number(price.replace(",",".")):NaN;
  const amount=Math.round(parsed*100);
- const kind=read(fd,"gift_kind"),availability=read(fd,"availability_kind"),rawQuantity=read(fd,"quantity_total"),quantity=availability==="limited"?Number(rawQuantity):null;
+ const kind=read(fd,"gift_kind"),availability="unlimited",quantity=null;
  const order=Number(read(fd,"sort_order")||0);
  const target=id?`${base}/${id}`:`${base}/novo`;
- if((id&&!uuid(id))||!title||title.length>160||!slug||description.length>3000||!Number.isSafeInteger(amount)||amount<100||amount>999999999||!["symbolic","physical","contribution"].includes(kind)||!["unlimited","limited"].includes(availability)||!Number.isSafeInteger(order)||order<0||order>100000||(availability==="limited"&&(!Number.isSafeInteger(quantity)||quantity===null||quantity<1||quantity>10000))||(category&&!uuid(category)))redirect(`${target}?error=fields`);
+ if((id&&!uuid(id))||!title||title.length>160||!slug||description.length>3000||!Number.isSafeInteger(amount)||amount<100||amount>999999999||!["symbolic","physical","contribution"].includes(kind)||!Number.isSafeInteger(order)||order<0||order>100000||(category&&!uuid(category)))redirect(`${target}?error=fields`);
  if(category){const {data}=await db.from("gift_categories").select("id").eq("wedding_id",ctx.weddingId).eq("id",category).maybeSingle();if(!data)redirect(`${target}?error=category`);}
  let previous:string|null=null;
  if(id){const {data}=await db.from("gifts").select("image_path").eq("wedding_id",ctx.weddingId).eq("id",id).is("deleted_at",null).maybeSingle();if(!data)redirect(`${base}?error=missing`);previous=data.image_path;}

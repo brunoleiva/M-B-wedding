@@ -31,6 +31,7 @@ export type GiftPayment = {
   id: string;
   gift_id: string | null;
   checkout_token: string | null;
+  expires_at: string | null;
   guest_name: string;
   message: string | null;
   amount_cents: number;

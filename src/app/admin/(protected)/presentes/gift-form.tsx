@@ -10,7 +10,7 @@ export async function GiftEditor({gift,categories,error}:{gift?:Gift;categories:
  const image=gift?.image_path&&db?db.storage.from("wedding-media").getPublicUrl(gift.image_path).data.publicUrl:null;
  return <div className="mx-auto max-w-3xl space-y-6">
   <Link href="/admin/presentes" className="admin-btn admin-btn--back">← Voltar aos presentes</Link>
-  <header><p className="eyebrow">Catálogo de presentes</p><h1 className="font-editorial text-4xl">{gift?"Editar presente":"Novo presente"}</h1><p className="mt-2 text-muted">Defina o preço, a disponibilidade e o que aparece na página pública.</p></header>
+  <header><p className="eyebrow">Catálogo de presentes</p><h1 className="font-editorial text-4xl">{gift?"Editar presente":"Novo presente"}</h1><p className="mt-2 text-muted">Defina o preço e o que aparece na página pública. Os presentes não possuem limite de quantidade.</p></header>
   {error&&<p role="alert" className="rounded-xl border border-red-300 p-4 text-red-800">Não foi possível salvar ({error}). Revise os campos, o nome único e a imagem.</p>}
   <form action={saveGift} className="card-soft grid gap-4 p-5 sm:grid-cols-2 sm:p-8" encType="multipart/form-data">
    {gift&&<input name="id" type="hidden" value={gift.id}/>}

@@ -25,7 +25,7 @@ export async function getAdminGifts(): Promise<{gifts: Gift[]; categories: GiftC
 export async function getAdminGiftPayments(): Promise<GiftPayment[]> {
   const {db,weddingId} = await context();
   const {data,error} = await db.from("gift_payments")
-    .select("id,gift_id,checkout_token,guest_name,message,amount_cents,quantity,status,admin_note,confirmed_at,created_at")
+    .select("id,gift_id,checkout_token,guest_name,message,amount_cents,quantity,expires_at,status,admin_note,confirmed_at,created_at")
     .eq("wedding_id",weddingId).is("deleted_at",null).order("created_at",{ascending:false});
   if(error) throw new Error("Falha ao consultar pagamentos");
   return (data??[]) as GiftPayment[];

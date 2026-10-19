@@ -4,6 +4,7 @@ import {getAdminGiftPayments,getAdminGifts} from "@/services/gifts/admin";
 import {formatGiftAmount} from "@/services/gifts/types";
 import {ConfirmDeleteForm} from "@/components/admin/confirm-delete-form";
 import {reviewPayment} from "../actions";
+import {isGiftReservationExpired} from "@/services/gifts/reservation";
 export default async function PaymentDetail({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{error?:string}>}){
  const {id}=await params;const [payments,listing,query]=await Promise.all([getAdminGiftPayments(),getAdminGifts(),searchParams]);
  const payment=payments.find(p=>p.id===id);if(!payment)notFound();
@@ -12,7 +13,7 @@ export default async function PaymentDetail({params,searchParams}:{params:Promis
   <h1 className="font-editorial text-4xl">Conferir contribuição</h1>
   {query.error&&<p role="alert" className="rounded-xl border border-red-300 p-4 text-red-700">Não foi possível revisar. Confira a disponibilidade e tente novamente.</p>}
   <div className="card-soft space-y-3 p-6"><p><strong>Convidado:</strong> {payment.guest_name}</p><p><strong>Presente:</strong> {gift?.title??"Presente arquivado"}</p>
-   <p><strong>Valor:</strong> {formatGiftAmount(payment.amount_cents)}</p><p><strong>Situação:</strong> {payment.status==="confirmed"?"Confirmado":payment.status==="rejected"?"Rejeitado":"Pendente"}</p>
+   <p><strong>Valor:</strong> {formatGiftAmount(payment.amount_cents)}</p><p><strong>Situação:</strong> {payment.status==="confirmed"?"Confirmado":payment.status==="rejected"?"Rejeitado":isGiftReservationExpired(payment)?"Reserva expirada":"Pendente"}</p>
    <p><strong>Criado:</strong> {new Date(payment.created_at).toLocaleString("pt-BR")}</p><p><strong>Observação administrativa:</strong> {payment.admin_note??"—"}</p>
   </div>
   {payment.status==="pending_confirmation"&&<div className="card-soft space-y-4 p-6"><h2 className="text-xl font-semibold">Conferência manual</h2>
