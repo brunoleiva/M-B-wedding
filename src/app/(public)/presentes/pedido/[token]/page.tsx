@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -5,6 +6,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPixCode } from "@/services/gifts/pix";
 import { formatGiftAmount } from "@/services/gifts/types";
 import { PixCopyButton } from "./pix-copy-button";
+
+export const metadata: Metadata = { title: "Pedido de presente", robots: { index: false, follow: false } };
 
 export default async function GiftOrderPage({params}:{params:Promise<{token:string}>}) {
   const {token}=await params;
