@@ -4,11 +4,7 @@ import { kindLabel, statusLabel } from "@/services/rsvp/types";
 
 export const dynamic = "force-dynamic";
 
-function cell(value: unknown) {
-  const raw = String(value ?? "");
-  const safe = /^[\s]*[=+\-@]/.test(raw) ? "'" + raw : raw;
-  return '"' + safe.replaceAll('"', '""') + '"';
-}
+import { csvCell } from "@/services/rsvp/csv";
 
 export async function GET() {
   const admin = await getAdminContext();
@@ -25,7 +21,7 @@ export async function GET() {
     return new Response("Nao foi possivel gerar o relatorio", {status:500});
   }
   const header = ["Convidado","Familia","Tipo","Presenca","Data da resposta","Observacoes"];
-  const content = "\uFEFF" + [header,...rows].map(row=>row.map(cell).join(";")).join("\r\n") + "\r\n";
+  const content = "\uFEFF" + [header,...rows].map(row=>row.map(csvCell).join(";")).join("\r\n") + "\r\n";
   return new Response(content, {
     headers: {
       "Content-Type":"text/csv; charset=utf-8",
