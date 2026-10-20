@@ -23,6 +23,6 @@ export default async function Invitation({ params, searchParams }: { params: Pro
     <h1 className="font-editorial text-5xl">{family}</h1>
     <p className="mt-5 text-lg leading-relaxed text-muted sm:text-xl">Estamos muito felizes em convidar vocês para celebrar com Maysa & Bruno. Confirme a presença de cada pessoa abaixo.</p>
     <InviteForm token={token} guests={guests} saved={query.saved === "1"} error={Boolean(query.error)} />
-    <p className="mt-5 text-base text-muted">Este link é pessoal. Não o compartilhe publicamente.</p>
+    <p className="mt-5 rounded-xl border border-line bg-surface-muted p-4 text-sm leading-relaxed text-foreground"><strong>Privacidade do convite:</strong> este link permite consultar e alterar as respostas da sua família. Compartilhe somente com as pessoas deste convite.</p>
   </div></section>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { submitInvite } from "./actions";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -12,22 +12,16 @@ export function InviteForm({ token, guests, saved, error }: { token: string; gue
   const [editing, setEditing] = useState(!alreadyAnswered);
   const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    if (!saved) return;
-    const redirectTimer = window.setTimeout(() => window.location.replace("/"), 4500);
-    return () => window.clearTimeout(redirectTimer);
-  }, [saved]);
-
   return (
     <>
       {saved && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/65 px-4" role="presentation">
           <div role="dialog" aria-modal="true" aria-labelledby="rsvp-success-title" aria-describedby="rsvp-success-description" className="w-full max-w-md rounded-3xl bg-white p-8 text-center text-stone-900 shadow-2xl">
             <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-green-100 text-3xl text-green-800" aria-hidden="true">✓</div>
-            <h2 id="rsvp-success-title" className="font-editorial text-3xl">Formulário enviado!</h2>
+            <h2 id="rsvp-success-title" className="font-editorial text-3xl">Presenças registradas!</h2>
             <p id="rsvp-success-description" className="mt-3 text-lg">Recebemos as respostas da sua família. Obrigado por confirmar! ❤️</p>
-            <p className="mt-3 text-base text-stone-600">Você será levado à página inicial em alguns segundos.</p>
-            <Link href="/" className="focus-ring mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-lg font-semibold text-white transition hover:-translate-y-0.5 hover:bg-stone-700">Voltar para a Home</Link>
+            <p className="mt-3 text-base text-stone-600">Você pode permanecer nesta página e voltar ao seu convite para consultar ou alterar as respostas.</p>
+            <div className="mt-6 flex flex-col gap-3"><Link href="/" className="focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-lg font-semibold text-white transition hover:bg-stone-700">Ir para a Home</Link><Link href={`/convite/${token}`} className="focus-ring inline-flex min-h-12 w-full items-center justify-center rounded-full border border-stone-300 px-6 py-3 text-base font-semibold text-stone-900 transition hover:bg-stone-100">Consultar minhas respostas</Link></div>
           </div>
         </div>
       )}
@@ -43,6 +37,7 @@ export function InviteForm({ token, guests, saved, error }: { token: string; gue
       )}
 
       <form ref={formRef} action={submitInvite} className="card-soft mt-8 space-y-7 p-6 sm:p-9">
+        <div className="rounded-2xl bg-surface-muted p-4 text-base leading-relaxed text-foreground"><strong>Como responder:</strong> selecione “Irei” ou “Não irei” para cada pessoa do convite e salve no final. Você poderá alterar suas respostas depois usando este mesmo link.</div>
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="intent" value={alreadyAnswered ? "edit" : "create"} />
         {guests.map((guest) => (

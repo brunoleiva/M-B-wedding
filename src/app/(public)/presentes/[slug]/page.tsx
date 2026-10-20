@@ -45,13 +45,13 @@ export default async function GiftDetail({params,searchParams}:{params:Promise<{
           </div>
           {error&&<p role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-900">{error}</p>}
           <form action={createPixCheckout} className="space-y-4 rounded-2xl border border-line p-4 sm:p-5">
-            <div className="space-y-1"><h2 className="font-editorial text-2xl">Presentear via Pix</h2><p className="text-sm text-muted">Preencha seus dados para gerar o código de pagamento.</p></div>
+            <div className="space-y-1"><h2 className="font-editorial text-2xl">Presentear via Pix</h2><p className="text-sm leading-relaxed text-muted">Informe seu nome para criar um pedido. Na próxima tela você poderá copiar o código Pix ou escanear o QR Code. Nenhuma cobrança é realizada nesta etapa.</p></div>
             <input name="gift_id" value={gift.id} type="hidden"/>
             <input name="request_key" value={crypto.randomUUID()} type="hidden"/>
             <label className="block space-y-2 text-sm font-semibold" htmlFor="gift-guest-name"><span>Seu nome <span aria-hidden="true">*</span></span><input id="gift-guest-name" name="guest_name" className="guest-input" autoComplete="name" minLength={2} maxLength={160} required placeholder="Como podemos chamar você?"/></label>
             <label className="block space-y-2 text-sm font-semibold" htmlFor="gift-message"><span>Mensagem para os noivos <span className="font-normal text-muted">(opcional)</span></span><textarea id="gift-message" name="message" className="guest-input min-h-24" maxLength={1000} placeholder="Deixe uma mensagem especial..."/></label>
             <CheckoutButton amount={formatGiftAmount(gift.amount_cents)}/>
-            <p className="text-xs leading-relaxed text-muted">Gerar o Pix não realiza o pagamento. A confirmação será feita pelos noivos após conferirem o recebimento.</p>
+            <p className="rounded-xl border border-line bg-surface-muted p-3 text-sm leading-relaxed text-foreground"><strong>Importante:</strong> gerar o Pix não transfere dinheiro nem confirma o presente. Após pagar pelo aplicativo do banco, guarde o link do pedido. Os noivos confirmarão o recebimento após conferirem o extrato.</p>
           </form>
         </div>
       </article>
