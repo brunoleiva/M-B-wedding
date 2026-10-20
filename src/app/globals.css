@@ -144,3 +144,18 @@ a[href]:focus-visible, button:focus-visible, summary:focus-visible, input[type="
 .admin-btn:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
 .admin-btn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
 @media(prefers-reduced-motion:reduce){.admin-btn{transition:none}}
+
+/* Phase 10.3/10.4: administration on touch devices and narrow screens. */
+#admin-main-content { overflow-wrap: anywhere; }
+#admin-main-content :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { max-width: 100%; }
+#admin-main-content :where(table) { border-collapse: collapse; }
+#admin-main-content :where(th) { font-weight: 700; }
+#admin-main-content :where(td, th) { vertical-align: middle; }
+#admin-main-content :where(form) { min-width: 0; }
+#admin-main-content :where(.card-soft) { min-width: 0; }
+@media (max-width: 639px) {
+  #admin-main-content :where(h1) { font-size: clamp(2rem, 8.5vw, 3rem); line-height: 1.12; overflow-wrap: anywhere; }
+  #admin-main-content :where(.admin-btn) { min-height: 3rem; }
+  #admin-main-content :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { font-size: 1rem; }
+  #admin-main-content :where(.overflow-x-auto) { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+}
