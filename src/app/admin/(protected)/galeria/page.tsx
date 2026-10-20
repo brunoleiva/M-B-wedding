@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default async function GalleryAdmin({searchParams}:{searchParams:Promise<{error?:string;saved?:string;removed?:string}>}) {
   const ctx=await getAdminContext(); const supabase=await createSupabaseServerClient();
-  const {data:photos}=ctx&&supabase ? await supabase.from("gallery_images").select("id,storage_path,alt_text,caption,sort_order,is_cover,is_published").eq("wedding_id",ctx.weddingId).order("sort_order").order("created_at") : {data:[]};
+  const {data:photos}=ctx&&supabase ? await supabase.from("gallery_images").select("id,storage_path,alt_text,caption,sort_order,is_cover,is_published").eq("wedding_id",ctx.weddingId).is("deleted_at",null).order("sort_order").order("created_at") : {data:[]};
   const params=await searchParams;
   return <div className="space-y-8"><div><p className="eyebrow">Galeria</p><h1 className="font-editorial text-5xl">Fotos de Maysa & Bruno</h1><p className="mt-3 text-muted">JPG, PNG ou WEBP até 5 MB. Fotos não publicadas ficam ocultas dos convidados.</p><Link href="/fotos" className="underline">Ver galeria pública</Link></div>
   {params.error && <p role="alert" className="text-red-700">Falha ao salvar ({params.error}). Confira o arquivo e os campos.</p>}{(params.saved||params.removed)&&<p role="status" className="text-green-700">Alterações salvas com sucesso.</p>}

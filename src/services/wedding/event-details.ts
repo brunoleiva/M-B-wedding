@@ -10,8 +10,8 @@ export type ScheduleItem = { id: string; starts_at: string; title: string; descr
 export async function getEventDetails(weddingId: string, publishedOnly: boolean) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return { venues: [] as Venue[], schedule: [] as ScheduleItem[] };
-  let v = supabase.from("venues").select("id,kind,name,address,description,starts_at,google_maps_url,waze_url,is_published").eq("wedding_id", weddingId).order("created_at");
-  let s = supabase.from("schedule_events").select("id,starts_at,title,description,sort_order,is_public").eq("wedding_id", weddingId).order("starts_at").order("sort_order");
+  let v = supabase.from("venues").select("id,kind,name,address,description,starts_at,google_maps_url,waze_url,is_published").eq("wedding_id", weddingId).is("deleted_at",null).order("created_at");
+  let s = supabase.from("schedule_events").select("id,starts_at,title,description,sort_order,is_public").eq("wedding_id", weddingId).is("deleted_at",null).order("starts_at").order("sort_order");
   if (publishedOnly) { v = v.eq("is_published", true); s = s.eq("is_public", true); }
   const [vr, sr] = await Promise.all([v, s]);
   if (vr.error || sr.error) { console.error("Failed to load wedding details", vr.error?.code, sr.error?.code); }

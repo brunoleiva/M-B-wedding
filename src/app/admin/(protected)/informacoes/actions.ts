@@ -25,7 +25,7 @@ export async function savePerson(f:FormData){
  // O caminho da imagem deve vir do banco, nunca de um campo editÃ¡vel do navegador.
  let image_path="";
  if(id){
-  const {data:existing,error}=await db.from("special_people").select("image_path").eq("id",id).eq("wedding_id",admin.weddingId).maybeSingle();
+  const {data:existing,error}=await db.from("special_people").select("image_path").eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null).maybeSingle();
   if(error||!existing)go("database");
   image_path=existing?.image_path??"";
  }
@@ -38,7 +38,7 @@ export async function savePerson(f:FormData){
   const {error}=await db.storage.from("wedding-media").upload(path,photo,{contentType:photo.type});if(error)go("image");image_path=path;
  }
  const payload={wedding_id:admin.weddingId,name,role_label:role,category:val(f,"category",100)||"Outros",description:val(f,"description")||null,image_path:image_path||null,sort_order:order(f),is_published:selected(f,"is_published")};
- const result=id?await db.from("special_people").update(payload).eq("id",id).eq("wedding_id",admin.weddingId):await db.from("special_people").insert(payload);
+ const result=id?await db.from("special_people").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("special_people").insert(payload);
  if(result.error&&image_path&&image_path!==previousImagePath){
   await db.storage.from("wedding-media").remove([image_path]);
  }
@@ -47,17 +47,17 @@ export async function savePerson(f:FormData){
 export async function saveFaq(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const question=val(f,"question",500);const answer=val(f,"answer",4000);
  if(!question||!answer)go("fields");const payload={wedding_id:admin.weddingId,question,answer,sort_order:order(f),is_active:selected(f,"is_active")};
- const result=id?await db.from("faqs").update(payload).eq("id",id).eq("wedding_id",admin.weddingId):await db.from("faqs").insert(payload);go(result.error?"database":undefined);
+ const result=id?await db.from("faqs").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("faqs").insert(payload);go(result.error?"database":undefined);
 }
 export async function saveHotel(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const name=val(f,"name",150),url=val(f,"website_url",1000);
  if(!name||!validUrl(url))go("fields");
  const payload={wedding_id:admin.weddingId,name,address:val(f,"address",500)||null,notes:val(f,"notes")||null,website_url:url||null,sort_order:order(f),is_published:selected(f,"is_published")};
- const result=id?await db.from("recommended_hotels").update(payload).eq("id",id).eq("wedding_id",admin.weddingId):await db.from("recommended_hotels").insert(payload);go(result.error?"database":undefined);
+ const result=id?await db.from("recommended_hotels").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("recommended_hotels").insert(payload);go(result.error?"database":undefined);
 }
 export async function deleteInfoItem(f:FormData){
  const {admin,db}=await context();const table=val(f,"table");const id=val(f,"id");
  if(!["special_people","faqs","recommended_hotels"].includes(table)||!/^[0-9a-f-]{36}$/i.test(id))go("fields");
- const {error}=await db.from(table).delete().eq("wedding_id",admin.weddingId).eq("id",id);go(error?"database":undefined);
+ const {data,error}=await db.from(table).update({deleted_at:new Date().toISOString()}).eq("wedding_id",admin.weddingId).eq("id",id).is("deleted_at",null).select("id").maybeSingle();go(error||!data?"database":undefined);
 }
 

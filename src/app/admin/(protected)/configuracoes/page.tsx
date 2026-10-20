@@ -12,7 +12,7 @@ export default async function SettingsPage({ searchParams }: Props) {
   if (!client) return <p>Configure as variáveis do Supabase para editar o casamento.</p>;
   const [{data:wedding}, {data:venues}] = await Promise.all([
     client.from("weddings").select("first_name,second_name,event_at,timezone,city,hero_subtitle,hero_image_path").eq("id",context.weddingId).single(),
-    client.from("venues").select("name,address,description").eq("wedding_id",context.weddingId).order("created_at").limit(1),
+    client.from("venues").select("name,address,description").eq("wedding_id",context.weddingId).is("deleted_at",null).order("created_at").limit(1),
   ]);
   if (!wedding) return <p>Casamento não encontrado. Confira o vínculo do administrador.</p>;
   const venue = venues?.[0];

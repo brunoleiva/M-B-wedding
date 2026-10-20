@@ -7,7 +7,7 @@ import Link from "next/link";
 export default async function StoryAdmin({searchParams}:{searchParams:Promise<{error?:string;saved?:string;removed?:string}>}) {
   const ctx = await getAdminContext();
   const supabase = await createSupabaseServerClient();
-  const {data: events} = ctx && supabase ? await supabase.from("story_events").select("id,title,description,year_label,sort_order,is_published").eq("wedding_id",ctx.weddingId).order("sort_order").order("created_at") : {data:[]};
+  const {data: events} = ctx && supabase ? await supabase.from("story_events").select("id,title,description,year_label,sort_order,is_published").eq("wedding_id",ctx.weddingId).is("deleted_at",null).order("sort_order").order("created_at") : {data:[]};
   const params = await searchParams;
   return <div className="space-y-8"><div><p className="eyebrow">Conteúdo</p><h1 className="font-editorial text-5xl">Nossa história</h1><p className="mt-2 text-muted">Cadastre e ordene os momentos do casal. Somente momentos publicados aparecem no site.</p><Link className="mt-3 inline-block underline" href="/historia">Ver página pública</Link></div>
   {params.error && <p role="alert" className="text-red-700">Não foi possível salvar. Confira os campos e tente novamente.</p>}

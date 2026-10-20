@@ -16,7 +16,7 @@ export async function saveStory(form: FormData) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) redirect("/admin/conteudo?error=database");
   const values = { title, description, year_label: year || null, sort_order: sort, is_published: form.get("published") === "on" };
-  const result = id ? await supabase.from("story_events").update(values).eq("id", id).eq("wedding_id", context.weddingId) : await supabase.from("story_events").insert({ ...values, wedding_id: context.weddingId });
+  const result = id ? await supabase.from("story_events").update(values).eq("id", id).eq("wedding_id", context.weddingId).is("deleted_at",null) : await supabase.from("story_events").insert({ ...values, wedding_id: context.weddingId });
   if (result.error) redirect("/admin/conteudo?error=database");
   revalidatePath("/"); revalidatePath("/historia");
   redirect("/admin/conteudo?saved=1");
@@ -28,7 +28,7 @@ export async function removeStory(form: FormData) {
   const id = String(form.get("id") ?? "");
   const supabase = await createSupabaseServerClient();
   if (!supabase || !id) redirect("/admin/conteudo?error=database");
-  const { error } = await supabase.from("story_events").delete().eq("id",id).eq("wedding_id",context.weddingId);
-  if (error) redirect("/admin/conteudo?error=database");
+  const { data, error } = await supabase.from("story_events").update({deleted_at:new Date().toISOString(),is_published:false}).eq("id",id).eq("wedding_id",context.weddingId).is("deleted_at",null).select("id").maybeSingle();
+  if (error || !data) redirect("/admin/conteudo?error=database");
   revalidatePath("/"); revalidatePath("/historia"); redirect("/admin/conteudo?removed=1");
 }

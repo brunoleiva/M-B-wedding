@@ -50,7 +50,7 @@ export async function saveVenue(form: FormData) {
   const startsAt = instant(str(form,"starts_at"),timezone);
   if ((id && !uuid(id)) || !["ceremony","reception","both"].includes(kind) || !name || !address || name.length>160 || address.length>500 || description.length>3000 || !link(google) || !link(waze) || startsAt === undefined) redirect(route + "?error=venue_fields");
   const payload = { kind, name, address, description: optional(description), starts_at: startsAt, google_maps_url: optional(google), waze_url: optional(waze), is_published: form.get("published") === "on" };
-  const result = id ? await db.from("venues").update(payload).eq("id", id).eq("wedding_id", ctx.weddingId).select("id").maybeSingle() : await db.from("venues").insert({ ...payload, wedding_id: ctx.weddingId }).select("id").maybeSingle();
+  const result = id ? await db.from("venues").update(payload).eq("id", id).eq("wedding_id", ctx.weddingId).is("deleted_at",null).select("id").maybeSingle() : await db.from("venues").insert({ ...payload, wedding_id: ctx.weddingId }).select("id").maybeSingle();
   if (result.error || !result.data) redirect(route + "?error=database");
   refreshed(); redirect(route + "?saved=venue");
 }
@@ -58,7 +58,7 @@ export async function removeVenue(form: FormData) {
   const { ctx, db } = await adminClient();
   const id = str(form,"id");
   if (!uuid(id)) redirect(route + "?error=venue_fields");
-  const { data, error } = await db.from("venues").delete().eq("id", id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();
+  const { data, error } = await db.from("venues").update({deleted_at:new Date().toISOString(),is_published:false}).eq("id", id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).select("id").maybeSingle();
   if (error || !data) redirect(route + "?error=database");
   refreshed(); redirect(route + "?removed=venue");
 }
@@ -69,14 +69,14 @@ export async function saveSchedule(form: FormData) {
   const at = instant(str(form,"starts_at"),timezone), order = Number(str(form,"sort_order") || "0");
   if ((id && !uuid(id)) || !title || title.length>150 || description.length>2000 || !at || !Number.isSafeInteger(order) || order < 0 || order>100000) redirect(route + "?error=schedule_fields");
   const payload = { title, description: optional(description), starts_at: at, sort_order: order, is_public: form.get("published") === "on" };
-  const result = id ? await db.from("schedule_events").update(payload).eq("id", id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle() : await db.from("schedule_events").insert({...payload, wedding_id:ctx.weddingId}).select("id").maybeSingle();
+  const result = id ? await db.from("schedule_events").update(payload).eq("id", id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).select("id").maybeSingle() : await db.from("schedule_events").insert({...payload, wedding_id:ctx.weddingId}).select("id").maybeSingle();
   if (result.error || !result.data) redirect(route + "?error=database");
   refreshed(); redirect(route + "?saved=schedule");
 }
 export async function removeSchedule(form: FormData) {
   const { ctx, db } = await adminClient();
   const id = str(form,"id"); if (!uuid(id)) redirect(route + "?error=schedule_fields");
-  const { data, error } = await db.from("schedule_events").delete().eq("id",id).eq("wedding_id",ctx.weddingId).select("id").maybeSingle();
+  const { data, error } = await db.from("schedule_events").update({deleted_at:new Date().toISOString(),is_public:false}).eq("id",id).eq("wedding_id",ctx.weddingId).is("deleted_at",null).select("id").maybeSingle();
   if (error || !data) redirect(route + "?error=database");
   refreshed(); redirect(route + "?removed=schedule");
 }

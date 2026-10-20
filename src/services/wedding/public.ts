@@ -28,7 +28,7 @@ export async function getPublicWedding(): Promise<PublicWedding> {
   if (error || !wedding) return fallback();
   const { data: venue } = await supabase.from("venues")
     .select("name,starts_at,address,description")
-    .eq("wedding_id", wedding.id).eq("is_published",true)
+    .eq("wedding_id", wedding.id).is("deleted_at",null).eq("is_published",true)
     .order("created_at",{ascending:true}).limit(1).maybeSingle();
   const date = new Date(wedding.event_at);
   const timezone = wedding.timezone || "America/Sao_Paulo";

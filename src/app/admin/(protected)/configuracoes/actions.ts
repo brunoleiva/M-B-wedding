@@ -61,12 +61,12 @@ export async function saveWeddingSettings(form: FormData) {
   // Local ainda não definido: não criar registro fictício nem exigir preenchimento.
   // Se houver um local antigo, despublicá-lo para não mostrar dados desatualizados.
   const { data: venue, error: venueLookupError } = await supabase.from("venues")
-    .select("id").eq("wedding_id", context.weddingId).order("created_at").limit(1).maybeSingle();
+    .select("id").eq("wedding_id", context.weddingId).is("deleted_at",null).order("created_at").limit(1).maybeSingle();
   if (venueLookupError) redirect("/admin/configuracoes?error=venue");
   const hasVenue = Boolean(values.venueName && values.venueAddress);
   if (!hasVenue && venue) {
     const { error: hideError } = await supabase.from("venues")
-      .update({ is_published: false }).eq("id", venue.id).eq("wedding_id", context.weddingId);
+      .update({ is_published: false }).eq("id", venue.id).eq("wedding_id", context.weddingId).is("deleted_at",null);
     if (hideError) redirect("/admin/configuracoes?error=venue");
   } else if (hasVenue) {
     const venuePayload = {
@@ -74,7 +74,7 @@ export async function saveWeddingSettings(form: FormData) {
       description: values.venueDescription, starts_at: eventAt, is_published: true,
     };
     const venueResult = venue
-      ? await supabase.from("venues").update(venuePayload).eq("id", venue.id).eq("wedding_id", context.weddingId)
+      ? await supabase.from("venues").update(venuePayload).eq("id", venue.id).eq("wedding_id", context.weddingId).is("deleted_at",null)
       : await supabase.from("venues").insert({ ...venuePayload, wedding_id: context.weddingId, kind: "both" });
     if (venueResult.error) redirect("/admin/configuracoes?error=venue");
   }

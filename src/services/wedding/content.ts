@@ -11,9 +11,9 @@ export async function getPublicContent() {
   if (!wedding) return { story: [] as StoryItem[], gallery: [] as GalleryItem[] };
   const [stories, photos] = await Promise.all([
     supabase.from("story_events").select("id,year_label,occurred_on,title,description,image_path")
-      .eq("wedding_id", wedding.id).eq("is_published", true).order("sort_order").order("created_at"),
+      .eq("wedding_id", wedding.id).is("deleted_at",null).eq("is_published", true).order("sort_order").order("created_at"),
     supabase.from("gallery_images").select("id,alt_text,caption,storage_path,is_cover")
-      .eq("wedding_id", wedding.id).eq("is_published", true).order("sort_order").order("created_at"),
+      .eq("wedding_id", wedding.id).is("deleted_at",null).eq("is_published", true).order("sort_order").order("created_at"),
   ]);
   const mediaUrl = (path: string) => supabase.storage.from("wedding-media").getPublicUrl(path).data.publicUrl;
   return {
