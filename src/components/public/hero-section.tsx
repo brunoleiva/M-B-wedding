@@ -11,7 +11,7 @@ export function HeroSection({ wedding }: { wedding: PublicWedding }) {
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[88%_62%] opacity-85 sm:object-[75%_68%]"
+        className="object-cover object-[82%_62%] opacity-85 sm:object-[75%_68%]"
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(22,17,13,.76)_0%,rgba(22,17,13,.42)_33%,rgba(22,17,13,.08)_70%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(25,20,16,.15)_0%,rgba(25,20,16,.12)_45%,rgba(25,20,16,.7)_100%)]" />
