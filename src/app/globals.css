@@ -70,7 +70,7 @@ body {
   padding-block: clamp(4.5rem, 10vw, 8rem);
 }
 
-/* Inner pages need clearance for the fixed 4.5rem public header. */
+/* Inner pages need clearance for the fixed public header. */
 .public-inner-page {
   padding-top: clamp(9rem, 13vw, 11rem);
 }
@@ -91,7 +91,7 @@ body {
 }
 
 .focus-ring:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--brand) 38%, transparent);
+  outline: 3px solid var(--brand-strong);
   outline-offset: 3px;
 }
 
