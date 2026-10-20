@@ -13,7 +13,7 @@ export default async function GalleryAdmin({searchParams}:{searchParams:Promise<
   const params=await searchParams;
   return <div className="space-y-8"><div><p className="eyebrow">Galeria</p><h1 className="font-editorial text-5xl">Fotos de Maysa & Bruno</h1><p className="mt-3 text-muted">JPG, PNG ou WEBP até 5 MB. Fotos não publicadas ficam ocultas dos convidados.</p><Link href="/fotos" className="underline">Ver galeria pública</Link></div>
   {params.error && <p role="alert" className="text-red-700">Falha ao salvar ({params.error}). Confira o arquivo e os campos.</p>}{(params.saved||params.removed)&&<p role="status" className="text-green-700">Alterações salvas com sucesso.</p>}
-  <GalleryUploadForm action={addPhoto} />
+  <GalleryUploadForm action={addPhoto} weddingId={ctx!.weddingId} />
   <section className="space-y-3" aria-label="Fotos cadastradas">
     <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold">Fotos cadastradas</h2><span className="rounded-full border border-line px-3 py-1 text-sm font-semibold">{photos?.length ?? 0} foto(s)</span></div>
     <div className="space-y-3">{(photos??[]).map(photo=><article key={photo.id} className="card-soft overflow-hidden p-3 sm:p-4">

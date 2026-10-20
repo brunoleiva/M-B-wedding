@@ -5,19 +5,27 @@ import { getAdminContext } from "@/services/admin/dashboard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function addPhoto(form: FormData) {
-  const ctx = await getAdminContext(); if (!ctx) redirect("/admin/login");
-  const supabase = await createSupabaseServerClient(); if (!supabase) redirect("/admin/galeria?error=database");
-  const file = form.get("image");
+  const ctx = await getAdminContext();
+  if (!ctx) return { ok: false, error: "Sua sessão expirou. Faça login novamente." };
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return { ok: false, error: "Serviço indisponível." };
+  const path = String(form.get("path") ?? "");
   const alt = String(form.get("alt") ?? "").trim();
   const caption = String(form.get("caption") ?? "").trim();
-  if (!(file instanceof File) || !file.size || file.size > 5 * 1024 * 1024 || !["image/jpeg","image/png","image/webp"].includes(file.type) || !alt || alt.length > 200 || caption.length > 500) redirect("/admin/galeria?error=invalid_fields");
-  const ext = file.type === "image/jpeg" ? "jpg" : file.type === "image/png" ? "png" : "webp";
-  const path = `${ctx.weddingId}/gallery/${crypto.randomUUID()}.${ext}`;
-  const {error:uploadError} = await supabase.storage.from("wedding-media").upload(path,file,{contentType:file.type,upsert:false});
-  if (uploadError) redirect("/admin/galeria?error=upload");
-  const {error} = await supabase.from("gallery_images").insert({wedding_id:ctx.weddingId,storage_path:path,alt_text:alt,caption:caption||null,is_published:true});
-  if (error) { await supabase.storage.from("wedding-media").remove([path]); redirect("/admin/galeria?error=database"); }
-  revalidatePath("/"); revalidatePath("/fotos"); redirect("/admin/galeria?saved=1");
+  // Somente caminhos de uploads nesta galeria do casamento autenticado.
+  const prefix = `${ctx.weddingId}/gallery/`;
+  const suffix = path.startsWith(prefix) ? path.slice(prefix.length) : "";
+  if (!/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(suffix) ||
+      !alt || alt.length > 200 || caption.length > 500) {
+    return { ok: false, error: "Dados da foto inválidos." };
+  }
+  const { error } = await supabase.from("gallery_images").insert({
+    wedding_id: ctx.weddingId, storage_path: path,
+    alt_text: alt, caption: caption || null, is_published: true
+  });
+  if (error) return { ok: false, error: "Falha ao registrar a foto." };
+  revalidatePath("/"); revalidatePath("/fotos"); revalidatePath("/admin/galeria");
+  return { ok: true };
 }
 
 export async function updatePhoto(form: FormData) {
