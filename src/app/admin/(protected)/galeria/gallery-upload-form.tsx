@@ -21,10 +21,10 @@ export function GalleryUploadForm({ action, weddingId }: Props) {
     const file = data.get("image");
     const alt = String(data.get("alt") ?? "").trim();
     const caption = String(data.get("caption") ?? "").trim();
-    if (!(file instanceof File) || !file.size || file.size > 5 * 1024 * 1024 ||
+    if (!(file instanceof File) || !file.size || file.size > 20 * 1024 * 1024 ||
         !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
         !alt || alt.length > 200 || caption.length > 500) {
-      setError("Selecione uma imagem JPG, PNG ou WEBP de até 5 MB e confira os campos.");
+      setError("Selecione uma imagem JPG, PNG ou WEBP de até 20 MB e confira os campos.");
       return;
     }
     submitting.current = true;
@@ -71,7 +71,7 @@ export function GalleryUploadForm({ action, weddingId }: Props) {
   }
 
   return <form onSubmit={upload} className="card-soft grid gap-4 p-5 sm:p-6" aria-busy={busy}>
-    <div><h2 className="text-xl font-semibold">Adicionar foto</h2><p className="mt-1 text-sm text-muted">Envie uma imagem por vez, até 5 MB.</p></div>
+    <div><h2 className="text-xl font-semibold">Adicionar foto</h2><p className="mt-1 text-sm text-muted">Envie uma imagem por vez, até 20 MB.</p></div>
     {error && <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">{error}</p>}
     <label className="text-sm font-semibold">Imagem *<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required disabled={busy} className="mt-1 block w-full rounded-lg border border-line p-3 font-normal"/></label>
     <div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">Descrição acessível *<input name="alt" required maxLength={200} disabled={busy} className="mt-1 w-full rounded-lg border border-line p-3 font-normal"/></label><label className="text-sm font-semibold">Legenda<input name="caption" maxLength={500} disabled={busy} className="mt-1 w-full rounded-lg border border-line p-3 font-normal"/></label></div>
