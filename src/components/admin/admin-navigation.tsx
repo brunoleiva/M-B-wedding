@@ -13,6 +13,7 @@ const items = [
   ["RSVP", "/admin/rsvp"],
   ["Presentes", "/admin/presentes"],
   ["Galeria", "/admin/galeria"],
+  ["Recados", "/admin/recados"],
   ["Configurações", "/admin/configuracoes"],
   ["Aparência e seções", "/admin/aparencia"],
 ] as const;
