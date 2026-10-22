@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getAppearance } from "@/services/wedding/appearance";
 import { SectionTitle } from "@/components/ui/section-title";
 import { getPublicGuestInformation } from "@/services/wedding/guest-information";
+import { FaqAccordion } from "@/components/public/faq-accordion";
 export const metadata={title:"Informações para convidados"};
 export default async function InfoPage(){
  if(!(await getAppearance()).visible.informacoes) notFound();
@@ -16,6 +17,6 @@ export default async function InfoPage(){
    {hasTransport&&<article className="card-soft p-7"><h2 className="font-editorial text-3xl">Como chegar</h2>{info?.transport_text&&<p className="mt-4 whitespace-pre-line text-muted">{info.transport_text}</p>}{info?.parking_text&&<p className="mt-3 whitespace-pre-line text-muted"><strong>Estacionamento:</strong> {info.parking_text}</p>}</article>}
   </div>}
   {hotels.length>0&&<section className="mt-16"><h2 className="font-editorial text-4xl">Hospedagem</h2><div className="mt-6 grid gap-5 sm:grid-cols-2">{hotels.map(h=><article className="card-soft p-6" key={h.id}><h3 className="text-xl font-semibold">{h.name}</h3>{h.address&&<p className="mt-2 text-muted">{h.address}</p>}{h.notes&&<p className="mt-2 whitespace-pre-line text-muted">{h.notes}</p>}{h.website_url&&<a href={h.website_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block underline">Visitar site do hotel</a>}</article>)}</div></section>}
-  {faqs.length>0&&<section className="mt-16"><h2 className="font-editorial text-4xl">Perguntas frequentes</h2><div className="mt-6 space-y-3">{faqs.map(f=><details key={f.id} className="card-soft p-5"><summary className="cursor-pointer font-semibold">{f.question}</summary><p className="mt-3 whitespace-pre-line text-muted">{f.answer}</p></details>)}</div></section>}
+  {faqs.length>0&&<section className="mt-16"><h2 className="font-editorial text-4xl">Perguntas frequentes</h2><div className="mt-6 space-y-3"><FaqAccordion items={faqs.map(f=>({id:f.id,question:f.question,answer:f.answer}))}/></div></section>}
  </div></section>;
 }

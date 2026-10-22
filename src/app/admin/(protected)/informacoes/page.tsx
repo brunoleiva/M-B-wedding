@@ -13,7 +13,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
   <header><p className="eyebrow">Administração</p><h1 className="font-editorial mt-2 text-5xl">Padrinhos e informações</h1><p className="mt-3 text-muted">Edite apenas o que já está definido. Conteúdos ocultos não aparecem para convidados.</p></header>
   {params.error&&<p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Não foi possível salvar. {params.error==="fields"?"Confira os campos obrigatórios e os links HTTPS.":params.error==="image"?"Imagem inválida: envie JPG, PNG ou WEBP até 5 MB.":"Confira se a migration 004 foi aplicada e se você tem permissão no Supabase."}</p>}
   {params.saved&&<p role="status" className="rounded-xl bg-green-50 p-4 text-green-900">Alterações salvas.</p>}
-  <section className="card-soft p-6"><h2 className="font-editorial text-3xl">Traje e transporte</h2><form action={saveInformation} className="mt-5 grid gap-4 sm:grid-cols-2">
+  <section id="traje-transporte" className="card-soft p-6"><h2 className="font-editorial text-3xl">Traje e transporte</h2><form action={saveInformation} className="mt-5 grid gap-4 sm:grid-cols-2">
    <label className={label}>Tipo de traje<input name="dress_title" className={input} defaultValue={data.info?.dress_title??""}/></label>
    <label className={label}>Cores a evitar<input name="colors_to_avoid" className={input} defaultValue={data.info?.colors_to_avoid??""}/></label>
    <label className={label+" sm:col-span-2"}>Orientações de traje<textarea name="dress_description" rows={3} className={input} defaultValue={data.info?.dress_description??""}/></label>
@@ -22,7 +22,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
    <label className="flex items-center gap-2"><input type="checkbox" name="is_published" defaultChecked={data.info?.is_published??false}/> Publicar informações</label>
    <button className={button}>Salvar informações</button>
   </form></section>
-  <section className="space-y-4"><h2 className="font-editorial text-3xl">Padrinhos e pessoas especiais</h2><p className="text-sm text-muted">Fotos opcionais; uploads JPG, PNG ou WEBP até 5 MB.</p>
+  <section id="pessoas-especiais" className="space-y-4"><h2 className="font-editorial text-3xl">Padrinhos e pessoas especiais</h2><p className="text-sm text-muted">Fotos opcionais; uploads JPG, PNG ou WEBP até 5 MB.</p>
   {[...data.people,null].map(person=><article key={person?.id??"new"} className="card-soft p-6"><h3 className="mb-4 font-semibold">{person?`Editar ${person.name}`:"Adicionar pessoa"}</h3>
    <form action={savePerson} className="grid gap-4 sm:grid-cols-2">
     {person&&<><input name="id" type="hidden" value={person.id}/><input name="existing_image_path" type="hidden" value={person.image_path??""}/></>}
@@ -36,7 +36,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
     <button className={button}>{person?"Salvar pessoa":"Adicionar pessoa"}</button>
    </form>{person&&<ConfirmDeleteForm action={deleteInfoItem} question="Você realmente deseja excluir este registro?" className="mt-3"><input name="table" value="special_people" type="hidden"/><input name="id" value={person.id} type="hidden"/><button className="admin-btn admin-btn--danger">Excluir pessoa</button></ConfirmDeleteForm>}
   </article>)}</section>
-  <section className="space-y-4"><h2 className="font-editorial text-3xl">Perguntas frequentes</h2>
+  <section id="perguntas-frequentes" className="space-y-4"><h2 className="font-editorial text-3xl">Perguntas frequentes</h2>
   {[...data.faqs,null].map(faq=><article className="card-soft p-6" key={faq?.id??"new"}><form action={saveFaq} className="grid gap-4">
    {faq&&<input type="hidden" name="id" value={faq.id}/>}
    <label className={label}>Pergunta *<input name="question" required className={input} defaultValue={faq?.question??""}/></label>
@@ -44,7 +44,7 @@ export default async function InfoAdmin({searchParams}:{searchParams:Promise<{er
    <div className="flex flex-wrap items-center gap-5"><label className={label}>Ordem<input type="number" min="0" name="sort_order" className={input} defaultValue={faq?.sort_order??0}/></label><label className="flex items-center gap-2"><input name="is_active" type="checkbox" defaultChecked={faq?.is_active??false}/> Publicar</label></div>
    <button className={button}>{faq?"Salvar pergunta":"Adicionar pergunta"}</button>
   </form>{faq&&<ConfirmDeleteForm action={deleteInfoItem} question="Você realmente deseja excluir este registro?" className="mt-3"><input type="hidden" name="table" value="faqs"/><input type="hidden" name="id" value={faq.id}/><button className="admin-btn admin-btn--danger">Excluir pergunta</button></ConfirmDeleteForm>}</article>)}</section>
-  <section className="space-y-4"><h2 className="font-editorial text-3xl">Hospedagem</h2>
+  <section id="hospedagem" className="space-y-4"><h2 className="font-editorial text-3xl">Hospedagem</h2>
   {[...data.hotels,null].map(hotel=><article className="card-soft p-6" key={hotel?.id??"new"}><form action={saveHotel} className="grid gap-4 sm:grid-cols-2">
    {hotel&&<input type="hidden" name="id" value={hotel.id}/>}
    <label className={label}>Hotel *<input name="name" required className={input} defaultValue={hotel?.name??""}/></label>

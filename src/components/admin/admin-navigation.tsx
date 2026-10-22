@@ -4,35 +4,48 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-const items = [
-  ["Visão geral", "/admin"],
-  ["Conteúdo", "/admin/conteudo"],
-  ["Cerimônia e cronograma", "/admin/casamento"],
-  ["Padrinhos e informações", "/admin/informacoes"],
-  ["Convidados", "/admin/convidados"],
-  ["RSVP", "/admin/rsvp"],
-  ["Presentes", "/admin/presentes"],
-  ["Galeria", "/admin/galeria"],
-  ["Recados", "/admin/recados"],
-  ["Configurações", "/admin/configuracoes"],
-  ["Aparência e seções", "/admin/aparencia"],
+const groups = [
+  { title: "Painel", links: [["Visão geral", "/admin"]] },
+  { title: "Conteúdo do site", links: [
+    ["Textos e história", "/admin/conteudo"],
+    ["Cerimônia e cronograma", "/admin/casamento"],
+    ["Galeria de fotos", "/admin/galeria"],
+    ["Padrinhos e pessoas especiais", "/admin/informacoes#pessoas-especiais"],
+    ["Traje e transporte", "/admin/informacoes#traje-transporte"],
+    ["Perguntas e respostas", "/admin/informacoes#perguntas-frequentes"],
+    ["Hospedagem", "/admin/informacoes#hospedagem"],
+  ] },
+  { title: "Convidados e interação", links: [
+    ["Lista de convidados", "/admin/convidados"],
+    ["Confirmações (RSVP)", "/admin/rsvp"],
+    ["Recados", "/admin/recados"],
+  ] },
+  { title: "Presentes", links: [["Lista e pagamentos", "/admin/presentes"]] },
+  { title: "Administração", links: [
+    ["Configurações", "/admin/configuracoes"],
+    ["Aparência e seções", "/admin/aparencia"],
+  ] },
 ] as const;
 
 function NavigationLinks({ close }: { close?: () => void }) {
   const pathname = usePathname();
-  return <nav className="space-y-1" aria-label="Navegação administrativa">
-    {items.map(([label, href]) => {
-      const active = pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
-      return <Link key={href} href={href} onClick={close} aria-current={active ? "page" : undefined}
-        className={`focus-ring block rounded-xl border px-4 py-3 text-base font-semibold transition-colors ${active ? "border-white/40 bg-white/20 text-white" : "border-transparent text-white/90 hover:bg-white/15 hover:text-white"}`}>
-        {label}
-      </Link>;
-    })}
+  return <nav className="space-y-5" aria-label="Navegação administrativa">
+    {groups.map(group => <section key={group.title} aria-label={group.title}>
+      <h2 className="mb-2 border-b border-white/15 px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">{group.title}</h2>
+      <div className="space-y-1">{group.links.map(([label, href]) => {
+        const route = href.split("#")[0];
+        const active = pathname === route || (route !== "/admin" && pathname.startsWith(`${route}/`));
+        return <Link key={href} href={href} onClick={close} aria-current={active && !href.includes("#") ? "page" : undefined}
+          className={`focus-ring block rounded-xl border px-3 py-2.5 text-sm font-semibold leading-5 transition-colors ${active ? "border-white/30 bg-white/15 text-white" : "border-transparent text-white/85 hover:bg-white/15 hover:text-white"}`}>
+          {label}
+        </Link>;
+      })}</div>
+    </section>)}
   </nav>;
 }
 
 export function AdminDesktopNavigation() {
-  return <NavigationLinks />;
+  return <div className="max-h-[calc(100vh-2rem)] overflow-y-auto pr-1"><NavigationLinks /></div>;
 }
 
 export function AdminMobileNavigation() {
