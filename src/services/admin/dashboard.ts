@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { cache } from "react";
 
 export type AdminContext = {
   email: string;
@@ -14,7 +15,7 @@ export type DashboardStats = {
   songSuggestions: number;
 };
 
-export async function getAdminContext(): Promise<AdminContext | null> {
+export const getAdminContext = cache(async (): Promise<AdminContext | null> => {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return null;
 
@@ -32,7 +33,7 @@ export async function getAdminContext(): Promise<AdminContext | null> {
 
   if (!membership) return null;
   return { email: user.email, weddingId: membership.wedding_id as string };
-}
+});
 
 export async function getDashboardStats(weddingId: string): Promise<DashboardStats> {
   const supabase = await createSupabaseServerClient();

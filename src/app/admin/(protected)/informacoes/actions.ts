@@ -12,12 +12,16 @@ async function context(){
  const db=await createSupabaseServerClient();if(!db) redirect("/admin/informacoes?error=database");
  return {admin,db};
 }
-function go(error?:string){revalidatePath("/informacoes");revalidatePath("/padrinhos");redirect(`/admin/informacoes?${error?`error=${error}`:"saved=1"}`);}
+function go(error?:string, view?:string){
+ revalidatePath("/informacoes");revalidatePath("/padrinhos");
+ if(view) revalidatePath(`/admin/informacoes/${view}`);
+ redirect(`/admin/informacoes${view?`/${view}`:""}?${error?`error=${error}`:"saved=1"}`);
+}
 function validUrl(url:string){if(!url)return true;try{const u=new URL(url);return u.protocol==="https:";}catch{return false;}}
 export async function saveInformation(f:FormData){
  const {admin,db}=await context();
  const payload={wedding_id:admin.weddingId,dress_title:val(f,"dress_title",160)||null,dress_description:val(f,"dress_description")||null,colors_to_avoid:val(f,"colors_to_avoid",1000)||null,transport_text:val(f,"transport_text")||null,parking_text:val(f,"parking_text")||null,is_published:selected(f,"is_published")};
- const {error}=await db.from("guest_information").upsert(payload,{onConflict:"wedding_id"});go(error?"database":undefined);
+ const {error}=await db.from("guest_information").upsert(payload,{onConflict:"wedding_id"});go(error?"database":undefined,"traje");
 }
 export async function savePerson(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const name=val(f,"name",150);const role=val(f,"role_label",150);
@@ -42,22 +46,22 @@ export async function savePerson(f:FormData){
  if(result.error&&image_path&&image_path!==previousImagePath){
   await db.storage.from("wedding-media").remove([image_path]);
  }
- go(result.error?"database":undefined);
+ go(result.error?"database":undefined,"pessoas");
 }
 export async function saveFaq(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const question=val(f,"question",500);const answer=val(f,"answer",4000);
  if(!question||!answer)go("fields");const payload={wedding_id:admin.weddingId,question,answer,sort_order:order(f),is_active:selected(f,"is_active")};
- const result=id?await db.from("faqs").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("faqs").insert(payload);go(result.error?"database":undefined);
+ const result=id?await db.from("faqs").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("faqs").insert(payload);go(result.error?"database":undefined,"faq");
 }
 export async function saveHotel(f:FormData){
  const {admin,db}=await context();const id=val(f,"id");const name=val(f,"name",150),url=val(f,"website_url",1000);
  if(!name||!validUrl(url))go("fields");
  const payload={wedding_id:admin.weddingId,name,address:val(f,"address",500)||null,notes:val(f,"notes")||null,website_url:url||null,sort_order:order(f),is_published:selected(f,"is_published")};
- const result=id?await db.from("recommended_hotels").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("recommended_hotels").insert(payload);go(result.error?"database":undefined);
+ const result=id?await db.from("recommended_hotels").update(payload).eq("id",id).eq("wedding_id",admin.weddingId).is("deleted_at",null):await db.from("recommended_hotels").insert(payload);go(result.error?"database":undefined,"hospedagem");
 }
 export async function deleteInfoItem(f:FormData){
  const {admin,db}=await context();const table=val(f,"table");const id=val(f,"id");
  if(!["special_people","faqs","recommended_hotels"].includes(table)||!/^[0-9a-f-]{36}$/i.test(id))go("fields");
- const {data,error}=await db.from(table).update({deleted_at:new Date().toISOString()}).eq("wedding_id",admin.weddingId).eq("id",id).is("deleted_at",null).select("id").maybeSingle();go(error||!data?"database":undefined);
+ const {data,error}=await db.from(table).update({deleted_at:new Date().toISOString()}).eq("wedding_id",admin.weddingId).eq("id",id).is("deleted_at",null).select("id").maybeSingle();go(error||!data?"database":undefined,table==="faqs"?"faq":table==="special_people"?"pessoas":"hospedagem");
 }
 
